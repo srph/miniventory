@@ -14,7 +14,7 @@ datasource db {
     url      = env("DATABASE_URL")
 }
 
-model Category {
+model Brand {
     id        String   @id @default(cuid())
     name      String
     createdAt DateTime @default(now())
@@ -23,22 +23,21 @@ model Category {
 }
 
 model Customer {
-    id            String        @id @default(cuid())
-    name          String
-    note          String?
-    email         String?
-    phone         String?
-    thumbnail_url String?
-    isActive      Boolean       @default(true)
-    createdAt     DateTime      @default(now())
-    updatedAt     DateTime      @updatedAt
-    Transaction   Transaction[]
+    id           String        @id @default(cuid())
+    name         String
+    note         String?
+    email        String?
+    phone        String?
+    thumbnailUrl String?
+    createdAt    DateTime      @default(now())
+    updatedAt    DateTime      @updatedAt
+    Transaction  Transaction[]
 }
 
 model Item {
     id                            String                          @id @default(cuid())
-    categoryId                    String
-    category                      Category                        @relation(fields: [categoryId], references: [id])
+    brandId                       String
+    brand                         Brand                           @relation(fields: [brandId], references: [id])
     name                          String
     thumbnailUrl                  String?
     quantity                      Int

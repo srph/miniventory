@@ -1,5 +1,5 @@
 -- CreateTable
-CREATE TABLE "Category" (
+CREATE TABLE "Brand" (
     "id" TEXT NOT NULL PRIMARY KEY,
     "name" TEXT NOT NULL,
     "createdAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -13,8 +13,7 @@ CREATE TABLE "Customer" (
     "note" TEXT,
     "email" TEXT,
     "phone" TEXT,
-    "thumbnail_url" TEXT,
-    "isActive" BOOLEAN NOT NULL DEFAULT true,
+    "thumbnailUrl" TEXT,
     "createdAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" DATETIME NOT NULL
 );
@@ -22,7 +21,7 @@ CREATE TABLE "Customer" (
 -- CreateTable
 CREATE TABLE "Item" (
     "id" TEXT NOT NULL PRIMARY KEY,
-    "categoryId" TEXT NOT NULL,
+    "brandId" TEXT NOT NULL,
     "name" TEXT NOT NULL,
     "thumbnailUrl" TEXT,
     "quantity" INTEGER NOT NULL,
@@ -30,7 +29,7 @@ CREATE TABLE "Item" (
     "retailPrice" REAL NOT NULL,
     "createdAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" DATETIME NOT NULL,
-    CONSTRAINT "Item_categoryId_fkey" FOREIGN KEY ("categoryId") REFERENCES "Category" ("id") ON DELETE RESTRICT ON UPDATE CASCADE
+    CONSTRAINT "Item_brandId_fkey" FOREIGN KEY ("brandId") REFERENCES "Brand" ("id") ON DELETE RESTRICT ON UPDATE CASCADE
 );
 
 -- CreateTable
