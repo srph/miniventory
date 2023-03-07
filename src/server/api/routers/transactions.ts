@@ -39,8 +39,6 @@ export const transactionsRouter = createTRPCRouter({
       })
     )
     .mutation(async ({ input }) => {
-      // @FUTURE: Add unique validation for item id
-      // @FUTURE: Add quantity validation
       // @FUTURE: Add order price validation
       const items = await prisma.item.findMany({
         where: {
@@ -48,8 +46,40 @@ export const transactionsRouter = createTRPCRouter({
         },
       });
 
+      // Basic validation to ensure all items are found
       if (items.length !== input.items.length) {
         throw new Error("Unable to find all provided items");
+      }
+
+      // Map transaction items to their corresponding
+      // database item to avoid multiple lookups
+      const clusteredItems = input.items.map((transactionItem) => {
+        const item = items.find((item) => {
+          return item.id === transactionItem.itemId;
+        });
+
+        if (item == null) {
+          throw new Error(`Unable to find item ${transactionItem.itemId}`);
+        }
+
+        return { item, transactionItem };
+      });
+
+      // Validate quantity before we proceed
+      for (const { item, transactionItem } of clusteredItems) {
+        if (item.quantity < transactionItem.quantity) {
+          throw new Error(
+            `Insufficient quantity for item ${transactionItem.itemId}`
+          );
+        }
+      }
+
+      // Persist the updated quantities to the database
+      for (const { item, transactionItem } of clusteredItems) {
+        await prisma.item.update({
+          where: { id: item.id },
+          data: { quantity: item.quantity - transactionItem.quantity },
+        });
       }
 
       const order = await prisma.transactionPurchaseOrder.create({
@@ -60,46 +90,21 @@ export const transactionsRouter = createTRPCRouter({
           totalQuantity: input.items.reduce((total, transactionItem) => {
             return total + transactionItem.quantity;
           }, 0),
-          totalSales: input.items.reduce((total, transactionItem) => {
+          totalSales: clusteredItems.reduce((total, { transactionItem }) => {
             return total + transactionItem.transactionPrice;
           }, 0),
-          expectedProfit: input.items.reduce((total, transactionItem) => {
-            const item = items.find((item) => {
-              return item.id === transactionItem.itemId;
-            });
-
-            if (item == null) {
-              throw new Error(`Unable to find item ${transactionItem.itemId}`);
-            }
-
+          expectedProfit: clusteredItems.reduce((total, { item }) => {
             return total + item.retailPrice - item.factoryPrice;
           }, 0),
-          totalProfit: input.items.reduce((total, transactionItem) => {
-            const item = items.find((item) => {
-              return item.id === transactionItem.itemId;
-            });
-
-            if (item == null) {
-              throw new Error(`Unable to find item ${transactionItem.itemId}`);
-            }
-
+          totalProfit: clusteredItems.reduce((total, clusteredItem) => {
+            const { item, transactionItem } = clusteredItem;
             return total + transactionItem.transactionPrice - item.factoryPrice;
           }, 0),
           customer: {
             connect: { id: input.customerId },
           },
           items: {
-            create: input.items.map((transactionItem) => {
-              const item = items.find((item) => {
-                return item.id === transactionItem.itemId;
-              });
-
-              if (item == null) {
-                throw new Error(
-                  `Unable to find item ${transactionItem.itemId}`
-                );
-              }
-
+            create: clusteredItems.map(({ item, transactionItem }) => {
               return {
                 item: {
                   connect: { id: transactionItem.itemId },
