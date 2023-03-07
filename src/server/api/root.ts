@@ -1,5 +1,7 @@
 import { createTRPCRouter } from "~/server/api/trpc";
 import { exampleRouter } from "~/server/api/routers/example";
+import { customersRouter } from "~/server/api/routers/customers";
+import { inventoryRouter } from "~/server/api/routers/inventory";
 import { transactionsRouter } from "~/server/api/routers/transactions";
 
 /**
@@ -9,6 +11,8 @@ import { transactionsRouter } from "~/server/api/routers/transactions";
  */
 export const appRouter = createTRPCRouter({
   example: exampleRouter,
+  customers: customersRouter,
+  inventory: inventoryRouter,
   transactions: transactionsRouter,
 });
 

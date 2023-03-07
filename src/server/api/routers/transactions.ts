@@ -1,7 +1,6 @@
+import { nanoid } from "nanoid";
 import { z } from "zod";
-
 import { createTRPCRouter, protectedProcedure } from "~/server/api/trpc";
-
 import { prisma } from "~/server/db";
 
 export const transactionsRouter = createTRPCRouter({
@@ -39,7 +38,7 @@ export const transactionsRouter = createTRPCRouter({
         ),
       })
     )
-    .query(async ({ input }) => {
+    .mutation(async ({ input }) => {
       // @FUTURE: Add unique validation for item id
       // @FUTURE: Add quantity validation
       // @FUTURE: Add order price validation
@@ -55,7 +54,7 @@ export const transactionsRouter = createTRPCRouter({
 
       const order = await prisma.transactionPurchaseOrder.create({
         data: {
-          code: "random-code",
+          code: `RESTOCK-${nanoid(10)}`,
           note: input.note,
           totalItems: input.items.length,
           totalQuantity: input.items.reduce((total, transactionItem) => {
