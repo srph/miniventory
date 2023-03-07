@@ -12,12 +12,10 @@ async function main() {
         name: faker.commerce.productName(),
         thumbnailUrl: faker.image.imageUrl(),
         quantity: Number(faker.random.numeric(2)),
-        originalPrice: Number(faker.random.numeric(2)),
+        factoryPrice: Number(faker.random.numeric(2)),
         retailPrice: Number(faker.random.numeric(2)),
         brand: {
-          connect: {
-            id: brand.id,
-          },
+          connect: { id: brand.id },
         },
       },
     });

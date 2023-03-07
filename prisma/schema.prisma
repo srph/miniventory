@@ -23,15 +23,15 @@ model Brand {
 }
 
 model Customer {
-    id           String        @id @default(cuid())
+    id           String                     @id @default(cuid())
     name         String
     note         String?
     email        String?
     phone        String?
     thumbnailUrl String?
-    createdAt    DateTime      @default(now())
-    updatedAt    DateTime      @updatedAt
-    Transaction  Transaction[]
+    createdAt    DateTime                   @default(now())
+    updatedAt    DateTime                   @updatedAt
+    transactions TransactionPurchaseOrder[]
 }
 
 model Item {
@@ -41,27 +41,36 @@ model Item {
     name                          String
     thumbnailUrl                  String?
     quantity                      Int
-    originalPrice                 Float
+    // Price of the item from the factory when it was restocked
+    factoryPrice                  Float
+    // Price of the item we're planning to sell it at (used as base when a purchase order comes in)
     retailPrice                   Float
     createdAt                     DateTime                        @default(now())
     updatedAt                     DateTime                        @updatedAt
-    TransactionPurchaseOrderItems TransactionPurchaseOrderItems[]
-    TransactionRestockOrderItems  TransactionRestockOrderItems[]
+    transactionPurchaseOrderItems TransactionPurchaseOrderItems[]
+    transactionRestockOrderItems  TransactionRestockOrderItems[]
 }
 
 model TransactionPurchaseOrder {
-    id                            String                          @id @default(cuid())
-    code                          String                          @unique
-    note                          String?
-    totalQuantity                 Int
-    totalItems                    Int
-    totalSales                    Int
-    expectedProfit                Float
-    totalProfit                   Int
-    createdAt                     DateTime                        @default(now())
-    updatedAt                     DateTime                        @updatedAt
-    TransactionPurchaseOrderItems TransactionPurchaseOrderItems[]
-    Transaction                   Transaction[]
+    id             String                          @id @default(cuid())
+    code           String                          @unique
+    note           String?
+    // Total quantity of all items
+    totalQuantity  Int
+    // Total number of items (excluding their quantity)
+    totalItems     Int
+    // Sum of all items' retail price
+    totalSales     Int
+    // Sum of all items' stock price (order.item.item.original_price) - original selling price (order.item.original_price)
+    expectedProfit Float
+    // Sum of all items' stock price (order.item.item.original_price) - input selling price (order.item.retail_price)
+    totalProfit    Int
+    createdAt      DateTime                        @default(now())
+    updatedAt      DateTime                        @updatedAt
+    customerId     String
+    customer       Customer?                       @relation(fields: [customerId], references: [id])
+    items          TransactionPurchaseOrderItems[]
+    transaction    Transaction[]
 }
 
 model TransactionPurchaseOrderItems {
@@ -70,26 +79,35 @@ model TransactionPurchaseOrderItems {
     transactionPurchaseOrder   TransactionPurchaseOrder @relation(fields: [transactionPurchaseOrderId], references: [id])
     itemId                     String
     item                       Item                     @relation(fields: [itemId], references: [id])
-    originalPrice              Float
+    // Factory price of item at time of transaction
+    factoryPrice               Float
+    // Intended price of the item at time of transaction
     retailPrice                Float
+    // Actual price of the item at time of transaction
+    transactionPrice           Float
     quantity                   Int
     createdAt                  DateTime                 @default(now())
     updatedAt                  DateTime                 @updatedAt
 }
 
 model TransactionRestockOrder {
-    id                           String                         @id @default(cuid())
-    code                         String                         @unique
-    note                         String?
-    totalQuantity                Int
-    totalItems                   Int
-    totalSales                   Int
-    expectedProfit               Float
-    totalProfit                  Int
-    createdAt                    DateTime                       @default(now())
-    updatedAt                    DateTime                       @updatedAt
-    TransactionRestockOrderItems TransactionRestockOrderItems[]
-    Transaction                  Transaction[]
+    id             String                         @id @default(cuid())
+    code           String                         @unique
+    note           String?
+    // Total quantity of all items
+    totalQuantity  Int
+    // Total number of items (excluding their quantity)
+    totalItems     Int
+    // Sum of all items' retail price
+    totalSales     Int
+    // Per item, we get retail price - factory price
+    expectedProfit Float
+    // Per item, we get transaction price - factory price
+    totalProfit    Int
+    createdAt      DateTime                       @default(now())
+    updatedAt      DateTime                       @updatedAt
+    items          TransactionRestockOrderItems[]
+    transaction    Transaction[]
 }
 
 model TransactionRestockOrderItems {
@@ -98,8 +116,12 @@ model TransactionRestockOrderItems {
     transactionRestockOrder   TransactionRestockOrder @relation(fields: [transactionRestockOrderId], references: [id])
     itemId                    String
     item                      Item                    @relation(fields: [itemId], references: [id])
-    originalPrice             Float
+    // Factory price of item at time of transaction
+    factoryPrice              Float
+    // Intended price of the item at time of transaction
     retailPrice               Float
+    // Actual price of the item at time of transaction
+    transactionPrice          Float
     quantity                  Int
     createdAt                 DateTime                @default(now())
     updatedAt                 DateTime                @updatedAt
@@ -112,13 +134,6 @@ model Transaction {
     restockOrder    TransactionRestockOrder?  @relation(fields: [restockOrderId], references: [id])
     purchaseOrderId String?
     purchaseOrder   TransactionPurchaseOrder? @relation(fields: [purchaseOrderId], references: [id])
-    customerId      String
-    customer        Customer                  @relation(fields: [customerId], references: [id])
-    total           Float
-    payment         Float
-    note            String?
-    createdAt       DateTime                  @default(now())
-    updatedAt       DateTime                  @updatedAt
 }
 
 // Necessary for Next auth
