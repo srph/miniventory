@@ -3,7 +3,7 @@ import { z } from "zod";
 import { createTRPCRouter, protectedProcedure } from "~/server/api/trpc";
 import { prisma } from "~/server/db";
 
-export const customerRouter = createTRPCRouter({
+export const customersRouter = createTRPCRouter({
   getAll: protectedProcedure
     .input(z.object({ search: z.string() }))
     .query(async ({ input }) => {
