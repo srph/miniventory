@@ -6,9 +6,24 @@ import { prisma } from "~/server/db";
 
 export const transactionsRouter = createTRPCRouter({
   getAll: protectedProcedure.query(async () => {
-    const transactions = await prisma.transaction.findMany();
+    const transactions = await prisma.transaction.findMany({
+      include: { purchaseOrder: true, restockOrder: true },
+    });
+
     return { transactions };
   }),
+
+  getTransactionItems: protectedProcedure
+    .input(z.object({ transactionId: z.string() }))
+    .query(async ({ input }) => {
+      const transactionItems =
+        await prisma.transactionPurchaseOrderItems.findMany({
+          where: { id: input.transactionId },
+          include: { item: true },
+        });
+
+      return { transactionItems };
+    }),
 
   createPurchaseOrder: protectedProcedure
     .input(
