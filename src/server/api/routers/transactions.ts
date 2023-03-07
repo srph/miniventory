@@ -5,7 +5,7 @@ import { createTRPCRouter, protectedProcedure } from "~/server/api/trpc";
 import { prisma } from "~/server/db";
 
 export const transactionsRouter = createTRPCRouter({
-  getAll: protectedProcedure.query(async ({ input }) => {
+  getAll: protectedProcedure.query(async () => {
     const transactions = await prisma.transaction.findMany();
     return { transactions };
   }),
@@ -71,6 +71,9 @@ export const transactionsRouter = createTRPCRouter({
 
             return total + transactionItem.transactionPrice - item.factoryPrice;
           }, 0),
+          customer: {
+            connect: { id: input.customerId },
+          },
           items: {
             create: input.items.map((transactionItem) => {
               const item = items.find((item) => {
@@ -100,12 +103,6 @@ export const transactionsRouter = createTRPCRouter({
       const transaction = await prisma.transaction.create({
         data: {
           type: "purchase",
-          customer: {
-            connect: {
-              id: input.customerId,
-            },
-          },
-
           purchaseOrder: {
             connect: { id: order.id },
           },
