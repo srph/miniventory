@@ -1,12 +1,11 @@
 import { type NextPage } from "next";
 import Head from "next/head";
-import Link from "next/link";
-// import { signIn, signOut, useSession } from "next-auth/react";
 import { config } from "~/config";
 import Boring from "boring-avatars";
 import { AiOutlineArrowUp } from "react-icons/ai";
 import { IoCaretDown } from "react-icons/io5";
 import { Button } from "~/components";
+import { AppLayout } from "~/page-components/AppLayout";
 
 import { api } from "~/utils/api";
 
@@ -21,52 +20,7 @@ const Home: NextPage = () => {
         <link rel="icon" href="/favicon.ico" />
       </Head>
 
-      <main className="h-screen bg-neutral-900 font-sans leading-none text-white">
-        <div className="border-t-2 border-b border-t-emerald-500 border-b-neutral-800 py-4">
-          <div className="mx-auto w-[1120px] px-2">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-3">
-                <a
-                  href="#"
-                  className="rounded bg-neutral-500 px-3 py-3 font-medium"
-                >
-                  Dashboard
-                </a>
-
-                <a
-                  href="#"
-                  className="rounded px-3 py-3 font-medium text-neutral-400 hover:text-white"
-                >
-                  Inventory
-                </a>
-
-                <a
-                  href="#"
-                  className="rounded px-3 py-3 font-medium text-neutral-400 hover:text-white"
-                >
-                  Customers
-                </a>
-              </div>
-
-              <div className="flex items-center gap-2">
-                <Boring
-                  size={40}
-                  colors={[
-                    "#0F7D7E",
-                    "#76B5A0",
-                    "#FFFDD1",
-                    "#FF7575",
-                    "#D33649",
-                  ]}
-                  name="Marie Joyce"
-                />
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <div className="mb-10"></div>
-
+      <AppLayout>
         <div className="mx-auto w-[1120px] px-2">
           <div className="flex items-center justify-between">
             <div className="w-[400px]">
@@ -175,7 +129,7 @@ const Home: NextPage = () => {
             ))}
           </div>
         </div>
-      </main>
+      </AppLayout>
     </>
   );
 };
