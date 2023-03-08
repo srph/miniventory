@@ -1,8 +1,9 @@
-import { type GetServerSidePropsContext } from "next";
+import { type GetServerSidePropsContext, GetServerSideProps } from "next";
 import {
   getServerSession,
   type NextAuthOptions,
   type DefaultSession,
+  type Session,
 } from "next-auth";
 import DiscordProvider from "next-auth/providers/discord";
 import { PrismaAdapter } from "@next-auth/prisma-adapter";
@@ -19,6 +20,9 @@ declare module "next-auth" {
   interface Session extends DefaultSession {
     user: {
       id: string;
+      name: string;
+      email: string;
+      image: string | null;
       // ...other properties
       // role: UserRole;
     } & DefaultSession["user"];
@@ -61,6 +65,44 @@ export const authOptions: NextAuthOptions = {
      * @see https://next-auth.js.org/providers/github
      */
   ],
+};
+
+export const getAuthenticatedServerSideProps: GetServerSideProps<{
+  session: Session | null;
+}> = async (ctx) => {
+  const session = await getServerAuthSession(ctx);
+
+  if (!session) {
+    return {
+      redirect: {
+        destination: "/login",
+        permanent: false,
+      },
+    };
+  }
+
+  return {
+    props: { session: await getServerAuthSession(ctx) },
+  };
+};
+
+export const getGuestServerSideProps: GetServerSideProps<{
+  session: Session | null;
+}> = async (ctx) => {
+  const session = await getServerAuthSession(ctx);
+
+  if (session) {
+    return {
+      redirect: {
+        destination: "/",
+        permanent: false,
+      },
+    };
+  }
+
+  return {
+    props: { session: await getServerAuthSession(ctx) },
+  };
 };
 
 /**

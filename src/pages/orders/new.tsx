@@ -1,11 +1,19 @@
+import React, { useState } from "react";
 import { type NextPage } from "next";
 import Head from "next/head";
 import { config } from "~/config";
 import { Button, TextInput } from "~/components";
 import { AppLayout } from "~/page-components/AppLayout";
 import { IoClose } from "react-icons/io5";
+import { Command } from "cmdk";
+import { api } from "~/utils/api";
+import { getAuthenticatedServerSideProps } from "~/server/auth";
 
 const OrdersNew: NextPage = () => {
+  const [input, setInput] = useState("");
+
+  const { data, isLoading, error } = api.inventory.getAll.useQuery({});
+
   return (
     <>
       <Head>
@@ -21,7 +29,32 @@ const OrdersNew: NextPage = () => {
               <div className="flex items-center justify-between">
                 <h2 className="text-2xl">New Purchase Order</h2>
                 <div className="w-[360px]">
-                  <TextInput placeholder="Search for an item to add" />
+                  <Command>
+                    <Command.Input
+                      className="block w-full rounded border border-neutral-700 bg-neutral-800 py-3 px-3 leading-none"
+                      placeholder="Search for an item to add"
+                    />
+
+                    <Command.List>
+                      {isLoading && (
+                        <Command.Loading>Loading...</Command.Loading>
+                      )}
+                    </Command.List>
+
+                    {data?.items.map((item) => {
+                      return (
+                        <div className="flex items-center px-2 py-2">
+                          <div className="h-[16px] w-[16px] rounded-full bg-neutral-500"></div>
+                          <div>
+                            {item.name}{" "}
+                            <span className="text-neutral-300">
+                              ({item.quantity})
+                            </span>
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </Command>
                 </div>
               </div>
 
@@ -131,4 +164,7 @@ const OrdersNew: NextPage = () => {
   );
 };
 
-export default OrdersNew;
+export {
+  getAuthenticatedServerSideProps as getServerSideProps,
+  OrdersNew as default,
+};

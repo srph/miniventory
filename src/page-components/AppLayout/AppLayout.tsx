@@ -3,9 +3,16 @@ import Link from "next/link";
 import { useRouter } from "next/router";
 import Boring from "boring-avatars";
 import { Button } from "~/components";
+import { useSession } from "next-auth/react";
 
 const AppLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  const { data } = useSession();
+
   const { push } = useRouter();
+
+  if (data?.user === undefined) {
+    throw new Error("User is not logged in.");
+  }
 
   return (
     <>
@@ -50,7 +57,7 @@ const AppLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
                     "#FF7575",
                     "#D33649",
                   ]}
-                  name="Marie Joyce"
+                  name={data.user.name}
                 />
               </div>
             </div>

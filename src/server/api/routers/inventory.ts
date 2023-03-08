@@ -4,7 +4,7 @@ import { prisma } from "~/server/db";
 
 export const inventoryRouter = createTRPCRouter({
   getAll: protectedProcedure
-    .input(z.object({ search: z.string() }))
+    .input(z.object({ search: z.string().optional() }))
     .query(async ({ input }) => {
       const items = await prisma.item.findMany({
         where: input.search ? { name: input.search } : {},
