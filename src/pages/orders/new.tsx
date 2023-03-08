@@ -3,6 +3,7 @@ import Head from "next/head";
 import { config } from "~/config";
 import { Button, TextInput } from "~/components";
 import { AppLayout } from "~/page-components/AppLayout";
+import { IoClose } from "react-icons/io5";
 
 const OrdersNew: NextPage = () => {
   return (
@@ -29,7 +30,7 @@ const OrdersNew: NextPage = () => {
               <div>
                 {[[], [], []].map((item, i) => (
                   <div
-                    className="flex items-center rounded border border-neutral-700 bg-neutral-800 px-4 py-4 first:rounded-tl-none"
+                    className="border-b-none flex items-center border-t border-l border-r border-neutral-700 bg-neutral-800 px-4 py-4 first:rounded-tl first:rounded-tr last:rounded-br last:rounded-bl last:border-b"
                     key={i}
                   >
                     <div className="flex w-[400px] shrink-0 items-center gap-4">
@@ -43,22 +44,31 @@ const OrdersNew: NextPage = () => {
                       </div>
                     </div>
 
-                    <div className="w-[140px]">
+                    <div className="w-[140px] shrink-0">
                       <h4 className="text-neutral-400">Quantity</h4>
                       <div className="mb-2"></div>
                       <span className="font-medium">5 pcs</span>
                     </div>
 
-                    <div className="w-[140px]">
+                    <div className="w-[140px] shrink-0">
                       <h4 className="text-neutral-400">Price</h4>
                       <div className="mb-2"></div>
                       <span className="font-medium">500.00</span>
                     </div>
 
-                    <div className="w-[140px]">
+                    <div className="w-[140px] shrink-0">
                       <h4 className="text-neutral-400">Total</h4>
                       <div className="mb-2"></div>
                       <span className="font-medium">2,430.00</span>
+                    </div>
+
+                    <div className="w-full">
+                      <button
+                        type="button"
+                        className="flex h-[24px] w-[24px] items-center justify-center rounded-full bg-neutral-500"
+                      >
+                        <IoClose />
+                      </button>
                     </div>
                   </div>
                 ))}
