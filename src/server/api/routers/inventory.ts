@@ -6,9 +6,9 @@ export const inventoryRouter = createTRPCRouter({
   getAll: protectedProcedure
     .input(z.object({ search: z.string().optional() }))
     .query(async ({ input }) => {
-      const items = await prisma.item.findMany({
-        where: input.search ? { name: input.search } : {},
-      });
+      const filters = input.search ? { name: { contains: input.search } } : {};
+
+      const items = await prisma.item.findMany({ where: filters });
 
       return { items };
     }),
