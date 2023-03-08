@@ -20,22 +20,42 @@ import { getAuthenticatedServerSideProps } from "~/server/auth";
 const OrdersNew: NextPage = () => {
   const [input, setInput] = useState("");
 
-  const { data, isLoading, error } = api.inventory.getAll.useQuery({
+  const [items, setItems] = useState<Item[]>([]);
+
+  const {
+    data: itemsQuery,
+    isLoading: isItemsQueryLoading,
+    error: itemsQueryError,
+  } = api.inventory.getAll.useQuery({
     search: input,
   });
 
-  type Item = NonNullable<typeof data>["items"][number];
+  const { data, isLoading, error } = api.customers.getAll.useQuery({
+    search: input,
+  });
+
+  type Item = NonNullable<typeof itemsQuery>["items"][number];
 
   const options: AutocompleteOption<Item>[] = useMemo(() => {
-    return (data?.items ?? []).map((item) => {
+    return (itemsQuery?.items ?? []).map((item) => {
       return { label: item.name, value: item.id, meta: item };
     });
-  }, [data]);
+  }, [itemsQuery]);
 
-  const [items, setItems] = useState([]);
+  const selected = useMemo(() => {
+    return items.map((item) => item.id);
+  }, [items]);
 
   const handleSelect = (_: string, option: Item) => {
-    return [...items, option];
+    setItems((items) => [...items, option]);
+  };
+
+  const handleRemove = (index: number) => {
+    return () => {
+      setItems((items) => {
+        return items.filter((_, i) => i !== index);
+      });
+    };
   };
 
   return (
@@ -56,6 +76,7 @@ const OrdersNew: NextPage = () => {
                 <div>
                   <Autocomplete<Item>
                     options={options}
+                    selected={selected}
                     option={({ meta: item }) => (
                       <div className="flex items-center gap-2 rounded px-2 py-2 group-aria-selected:bg-neutral-500">
                         {item.thumbnailUrl ? (
@@ -67,18 +88,20 @@ const OrdersNew: NextPage = () => {
                           <div className="h-[24px] w-[24px] rounded bg-neutral-500 group-aria-selected:bg-neutral-400" />
                         )}
 
-                        <div className="flex items-center gap-1">
-                          <span className="text-neutral-300 group-aria-selected:text-white">
+                        <div className="flex w-full items-center justify-between gap-2">
+                          <span className="w-full truncate text-neutral-300 group-aria-selected:text-white">
                             {item.name}
                           </span>
-                          <span className="text-neutral-500 group-aria-selected:text-neutral-300">
-                            ({item.quantity})
+                          <span className="shrink-0 text-neutral-500 group-aria-selected:text-neutral-300">
+                            ({item.quantity} pcs)
                           </span>
                         </div>
                       </div>
                     )}
-                    isLoading={isLoading}
-                    error={error}
+                    width={400}
+                    isLoading={isItemsQueryLoading}
+                    error={itemsQueryError}
+                    onInput={setInput}
                     onSelect={handleSelect}
                   >
                     <Button type="button" variant="primary">
@@ -97,12 +120,19 @@ const OrdersNew: NextPage = () => {
                     key={i}
                   >
                     <div className="flex w-[400px] shrink-0 items-center gap-4">
-                      <div className="h-[120px] w-[120px] rounded bg-neutral-500"></div>
+                      {item.thumbnailUrl ? (
+                        <img
+                          src={item.thumbnailUrl}
+                          className="h-[120px] w-[120px] rounded bg-neutral-500"
+                        />
+                      ) : (
+                        <div className="h-[120px] w-[120px] rounded bg-neutral-500"></div>
+                      )}
                       <div>
-                        <h4 className="font-medium">Sereese Milky Boost</h4>
+                        <h4 className="font-medium">{item.name}</h4>
                         <div className="mb-2"></div>
                         <span className="text-neutral-400">
-                          5 units / 500.00 price
+                          {item.quantity} pcs / {item.retailPrice}.00 per piece
                         </span>
                       </div>
                     </div>
@@ -110,25 +140,28 @@ const OrdersNew: NextPage = () => {
                     <div className="w-[140px] shrink-0">
                       <h4 className="text-neutral-400">Quantity</h4>
                       <div className="mb-2"></div>
-                      <span className="font-medium">5 pcs</span>
+                      <span className="font-medium">{item.quantity}</span>
                     </div>
 
                     <div className="w-[140px] shrink-0">
                       <h4 className="text-neutral-400">Price</h4>
                       <div className="mb-2"></div>
-                      <span className="font-medium">500.00</span>
+                      <span className="font-medium">{item.retailPrice}.00</span>
                     </div>
 
                     <div className="w-[140px] shrink-0">
                       <h4 className="text-neutral-400">Total</h4>
                       <div className="mb-2"></div>
-                      <span className="font-medium">2,430.00</span>
+                      <span className="font-medium">
+                        {item.retailPrice * item.quantity}.00
+                      </span>
                     </div>
 
                     <div className="w-full">
                       <button
                         type="button"
                         className="flex h-[24px] w-[24px] items-center justify-center rounded-full bg-neutral-500"
+                        onClick={handleRemove(i)}
                       >
                         <IoClose />
                       </button>

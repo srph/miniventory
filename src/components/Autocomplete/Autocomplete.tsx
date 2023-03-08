@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from "react";
+import React, { useState, useMemo, useRef } from "react";
 import * as Popover from "@radix-ui/react-popover";
 import { Command } from "cmdk";
 
@@ -15,10 +15,11 @@ interface AutocompleteProps<T> {
   error?: Error | undefined;
   selected?: string[];
   closeOnSelect?: boolean;
+  width?: number;
   option?: (option: AutocompleteOption<T>) => React.ReactNode;
   onInput?: (value: string) => void;
-  onSelect: (value: string, meta?: T) => void;
-  onCreate?: (value: string, meta?: T) => void;
+  onSelect: (value: string, meta: T) => void;
+  onCreate?: (value: string, meta: T) => void;
 }
 
 function DefaultOption<T>({ value, label }: AutocompleteOption<T>) {
@@ -35,11 +36,14 @@ function Autocomplete<T>({
   isLoading,
   selected,
   closeOnSelect,
+  width = 320,
   onInput,
   onSelect,
   onCreate,
   children,
 }: AutocompleteProps<T>) {
+  const inputRef = useRef<HTMLInputElement>(null);
+
   const [input, setInput] = useState("");
 
   const [isOpen, setIsOpen] = useState(false);
@@ -48,16 +52,22 @@ function Autocomplete<T>({
     setInput(value);
 
     onInput?.(value);
+  };
+
+  const handleSelect = (option: AutocompleteOption<T>) => {
+    inputRef.current?.focus();
+
+    onSelect(option.value, option.meta);
 
     if (closeOnSelect) {
+      handleInputChange("");
       setIsOpen(false);
     }
   };
 
   const handleOpenChange = (value: boolean) => {
     setIsOpen(value);
-    setInput("");
-    onInput?.("");
+    handleInputChange("");
   };
 
   const ids = useMemo(() => {
@@ -72,22 +82,24 @@ function Autocomplete<T>({
   }, [selected]);
 
   return (
-    <Command>
-      <Popover.Root open={isOpen} onOpenChange={handleOpenChange}>
-        <Popover.Trigger asChild>
-          <div>{children}</div>
-        </Popover.Trigger>
+    <Popover.Root open={isOpen} onOpenChange={handleOpenChange}>
+      <Popover.Trigger asChild>
+        <div>{children}</div>
+      </Popover.Trigger>
 
-        <Popover.Portal>
-          <Popover.Content
-            className="w-[320px] rounded border border-neutral-700 bg-neutral-800 px-3 py-3"
-            sideOffset={16}
-          >
+      <Popover.Portal>
+        <Popover.Content
+          style={{ width }}
+          className="rounded border border-neutral-700 bg-neutral-800 px-3 py-3"
+          sideOffset={16}
+        >
+          <Command label="Autocomplete" shouldFilter={false}>
             <div className="px-1.5">
               <Command.Input
+                ref={inputRef}
                 value={input}
                 onValueChange={handleInputChange}
-                className="block w-full rounded border border-neutral-700 bg-neutral-800 py-3 px-3 leading-none text-white"
+                className="block w-full rounded border border-neutral-700 bg-neutral-800 py-3 px-3 leading-none text-white focus:outline-1 focus:outline-neutral-500"
                 placeholder="Search for an item to add"
               />
             </div>
@@ -120,7 +132,7 @@ function Autocomplete<T>({
                       value={opt.value}
                       className="group"
                       onSelect={() => {
-                        onSelect(opt.value, opt.meta);
+                        handleSelect(opt);
                       }}
                     >
                       {option(opt)}
@@ -128,10 +140,10 @@ function Autocomplete<T>({
                   );
                 })}
             </Command.List>
-          </Popover.Content>
-        </Popover.Portal>
-      </Popover.Root>
-    </Command>
+          </Command>
+        </Popover.Content>
+      </Popover.Portal>
+    </Popover.Root>
   );
 }
 
