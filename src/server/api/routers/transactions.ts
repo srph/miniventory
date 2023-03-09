@@ -82,14 +82,6 @@ export const transactionsRouter = createTRPCRouter({
         }
       }
 
-      // Persist the updated quantities to the database
-      for (const { item, transactionItem } of clusteredItems) {
-        await prisma.item.update({
-          where: { id: item.id },
-          data: { quantity: item.quantity - transactionItem.quantity },
-        });
-      }
-
       const order = await prisma.transactionPurchaseOrder.create({
         data: {
           code: `PURCHASE-${nanoid(10)}`,
@@ -108,9 +100,9 @@ export const transactionsRouter = createTRPCRouter({
             const { item, transactionItem } = clusteredItem;
             return total + transactionItem.transactionPrice - item.factoryPrice;
           }, 0),
-          customer: {
-            connect: { id: input.customerId },
-          },
+          ...(input.customerId
+            ? { customer: { connect: { id: input.customerId } } }
+            : {}),
           items: {
             create: clusteredItems.map(({ item, transactionItem }) => {
               return {
@@ -126,6 +118,14 @@ export const transactionsRouter = createTRPCRouter({
           },
         },
       });
+
+      // Persist the updated quantities to the database
+      for (const { item, transactionItem } of clusteredItems) {
+        await prisma.item.update({
+          where: { id: item.id },
+          data: { quantity: item.quantity - transactionItem.quantity },
+        });
+      }
 
       const transaction = await prisma.transaction.create({
         data: {

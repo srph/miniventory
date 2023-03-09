@@ -20,7 +20,7 @@ model Brand {
     name      String
     createdAt DateTime @default(now())
     updatedAt DateTime @updatedAt
-    Item      Item[]
+    items     Item[]
 }
 
 model Customer {
@@ -69,7 +69,7 @@ model TransactionPurchaseOrder {
     totalProfit    Int
     createdAt      DateTime                        @default(now())
     updatedAt      DateTime                        @updatedAt
-    customerId     String
+    customerId     String?
     customer       Customer?                       @relation(fields: [customerId], references: [id])
     items          TransactionPurchaseOrderItems[]
     transaction    Transaction[]
@@ -136,6 +136,8 @@ model Transaction {
     restockOrder    TransactionRestockOrder?  @relation(fields: [restockOrderId], references: [id])
     purchaseOrderId String?
     purchaseOrder   TransactionPurchaseOrder? @relation(fields: [purchaseOrderId], references: [id])
+    createdAt       DateTime                  @default(now())
+    updatedAt       DateTime                  @updatedAt
 }
 
 // Necessary for Next auth

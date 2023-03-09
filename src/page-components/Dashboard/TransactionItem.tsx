@@ -1,6 +1,6 @@
 import { BigNumber } from "bignumber.js";
 import Boring from "boring-avatars";
-import { AiOutlineArrowUp } from "react-icons/ai";
+import { AiOutlineArrowUp, AiOutlineArrowDown } from "react-icons/ai";
 import { IoCaretDown } from "react-icons/io5";
 import { formatDistanceToNow } from "date-fns";
 import { api } from "~/utils/api";
@@ -15,27 +15,44 @@ const TransactionItem: React.FC = ({ transaction }) => {
   return (
     <div className="rounded bg-neutral-500">
       <div className="flex items-center py-3 px-3">
-        <div className="w-[200px] shrink-0">
+        <div className="w-[240px] shrink-0">
           {transaction.purchaseOrder.code}
         </div>
         <div className="w-[200px] shrink-0">
-          <div className="flex items-center gap-2">
-            <Boring
-              size={24}
-              colors={["#0F7D7E", "#76B5A0", "#FFFDD1", "#FF7575", "#D33649"]}
-              name="Marie Joyce"
-            />
-            {transaction.purchaseOrder.customer.name}
-          </div>
+          {Boolean(transaction.purchaseOrder.customer) && (
+            <div className="flex items-center gap-2">
+              <Boring
+                size={24}
+                colors={["#0F7D7E", "#76B5A0", "#FFFDD1", "#FF7575", "#D33649"]}
+                name="Marie Joyce"
+              />
+              {transaction.purchaseOrder.customer.name}
+            </div>
+          )}
+
+          {transaction.purchaseOrder.customer == null && (
+            <span className="truncate text-neutral-300">
+              Undefined Customer
+            </span>
+          )}
         </div>
         <div className="w-[200px] shrink-0">
           {transaction.purchaseOrder.totalQuantity} units purchased
         </div>
         <div className="w-[200px] shrink-0">
           <div className="flex items-center gap-2">
-            <span className="text-emerald-400">
-              <AiOutlineArrowUp />
-            </span>
+            {transaction.purchaseOrder.totalProfit > 0 && (
+              <span className="text-emerald-400">
+                <AiOutlineArrowUp />
+              </span>
+            )}
+
+            {transaction.purchaseOrder.totalProfit <= 0 && (
+              <span className="text-red-500">
+                <AiOutlineArrowDown />
+              </span>
+            )}
+
             <span className="font-medium">
               {new BigNumber(transaction.purchaseOrder.totalSales).toFormat(2)}
             </span>
@@ -53,7 +70,7 @@ const TransactionItem: React.FC = ({ transaction }) => {
 
       <div className="py-3 px-3">
         <div className="flex items-center">
-          <div className="w-[400px]">
+          <div className="w-[440px]">
             <div className="font-medium text-neutral-300">Unit</div>
           </div>
 
@@ -72,9 +89,17 @@ const TransactionItem: React.FC = ({ transaction }) => {
           {itemsQuery?.transactionItems.map((t, i) => {
             return (
               <div className="flex items-center" key={i}>
-                <div className="w-[400px]">
-                  <div className="flex items-center gap-3">
-                    <div className="h-[24px] w-[24px] rounded bg-neutral-800" />
+                <div className="w-[440px]">
+                  <div className="flex items-center gap-2">
+                    {t.item.thumbnailUrl ? (
+                      <img
+                        src={t.item.thumbnailUrl}
+                        className="h-[24px] w-[24px] rounded"
+                      />
+                    ) : (
+                      <div className="h-[24px] w-[24px] rounded bg-neutral-800" />
+                    )}
+
                     <span>
                       {t.item.name}{" "}
                       <span className="text-neutral-300">({t.quantity}x)</span>

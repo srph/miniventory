@@ -51,8 +51,8 @@ const OrdersNew: NextPage = () => {
   });
 
   interface TransactionItem {
-    quantity: number;
-    transactionPrice: number;
+    quantity: string;
+    transactionPrice: string;
     item: Item;
   }
 
@@ -96,7 +96,7 @@ const OrdersNew: NextPage = () => {
 
   const handlePrependItem = (_: string, option: Item) => {
     fields.prepend({
-      quantity: 1,
+      quantity: "1",
       transactionPrice: option.retailPrice,
       item: option,
     });
@@ -107,8 +107,8 @@ const OrdersNew: NextPage = () => {
       customerId: values.customer?.id,
       items: values.items.map((t) => ({
         itemId: t.item.id,
-        quantity: t.quantity,
-        transactionPrice: t.transactionPrice,
+        quantity: Number(t.quantity),
+        transactionPrice: Number(t.transactionPrice),
       })),
     });
   });

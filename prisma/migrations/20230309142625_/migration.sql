@@ -40,13 +40,13 @@ CREATE TABLE "TransactionPurchaseOrder" (
     "note" TEXT,
     "totalQuantity" INTEGER NOT NULL,
     "totalItems" INTEGER NOT NULL,
-    "totalSales" INTEGER NOT NULL,
+    "totalSales" REAL NOT NULL,
     "expectedProfit" REAL NOT NULL,
     "totalProfit" INTEGER NOT NULL,
     "createdAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" DATETIME NOT NULL,
-    "customerId" TEXT NOT NULL,
-    CONSTRAINT "TransactionPurchaseOrder_customerId_fkey" FOREIGN KEY ("customerId") REFERENCES "Customer" ("id") ON DELETE RESTRICT ON UPDATE CASCADE
+    "customerId" TEXT,
+    CONSTRAINT "TransactionPurchaseOrder_customerId_fkey" FOREIGN KEY ("customerId") REFERENCES "Customer" ("id") ON DELETE SET NULL ON UPDATE CASCADE
 );
 
 -- CreateTable
@@ -71,7 +71,7 @@ CREATE TABLE "TransactionRestockOrder" (
     "note" TEXT,
     "totalQuantity" INTEGER NOT NULL,
     "totalItems" INTEGER NOT NULL,
-    "totalSales" INTEGER NOT NULL,
+    "totalSales" REAL NOT NULL,
     "expectedProfit" REAL NOT NULL,
     "totalProfit" INTEGER NOT NULL,
     "createdAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -99,6 +99,8 @@ CREATE TABLE "Transaction" (
     "type" TEXT NOT NULL,
     "restockOrderId" TEXT,
     "purchaseOrderId" TEXT,
+    "createdAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" DATETIME NOT NULL,
     CONSTRAINT "Transaction_restockOrderId_fkey" FOREIGN KEY ("restockOrderId") REFERENCES "TransactionRestockOrder" ("id") ON DELETE SET NULL ON UPDATE CASCADE,
     CONSTRAINT "Transaction_purchaseOrderId_fkey" FOREIGN KEY ("purchaseOrderId") REFERENCES "TransactionPurchaseOrder" ("id") ON DELETE SET NULL ON UPDATE CASCADE
 );
