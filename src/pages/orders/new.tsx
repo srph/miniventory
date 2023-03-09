@@ -214,9 +214,14 @@ const OrdersNew: NextPage = () => {
                             <div>
                               <h4 className="font-medium">{t.item.name}</h4>
                               <div className="mb-2"></div>
-                              <span className="text-neutral-400">
-                                {t.item.quantity} pcs / {t.item.retailPrice}.00
-                                per piece
+                              <span className="flex items-center gap-2 text-neutral-400">
+                                <span>{t.item.quantity} pcs</span>
+                                <span className="text-xs">•</span>
+                                <span>
+                                  {new BigNumber(t.item.retailPrice).toFormat(
+                                    2
+                                  )}
+                                </span>
                               </span>
                             </div>
                           </div>
