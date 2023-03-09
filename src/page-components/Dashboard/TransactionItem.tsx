@@ -16,10 +16,11 @@ const TransactionItem: React.FC = ({ transaction }) => {
       value={transaction.id}
       className="overflow-hidden rounded bg-neutral-500"
     >
-      <Accordion.Header className="flex items-center py-3 px-3">
+      <Accordion.Header className="flex h-[48px] items-center py-3 px-3">
         <div className="w-[240px] shrink-0">
-          {transaction.purchaseOrder.code}
+          <span className="font-mono">{transaction.purchaseOrder.code}</span>
         </div>
+
         <div className="w-[200px] shrink-0">
           {Boolean(transaction.purchaseOrder.customer) && (
             <div className="flex items-center gap-2">
@@ -30,12 +31,6 @@ const TransactionItem: React.FC = ({ transaction }) => {
               />
               {transaction.purchaseOrder.customer.name}
             </div>
-          )}
-
-          {transaction.purchaseOrder.customer == null && (
-            <span className="truncate text-neutral-300">
-              Undefined Customer
-            </span>
           )}
         </div>
 

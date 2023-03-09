@@ -2,6 +2,7 @@ import { nanoid } from "nanoid";
 import { z } from "zod";
 import { createTRPCRouter, protectedProcedure } from "~/server/api/trpc";
 import { prisma } from "~/server/db";
+import { format } from "date-fns";
 
 export const transactionsRouter = createTRPCRouter({
   getAll: protectedProcedure
@@ -12,9 +13,29 @@ export const transactionsRouter = createTRPCRouter({
           purchaseOrder: { include: { customer: true } },
           restockOrder: true,
         },
+        orderBy: {
+          createdAt: "desc",
+        },
       });
 
-      return { transactions };
+      type Transaction = (typeof transactions)[number];
+
+      interface GroupedTransactionItem {
+        label: string;
+        transactions: Transaction[];
+      }
+
+      const transactionByMonth = transactions.reduce(
+        (object: Record<string, GroupedTransactionItem>, item) => {
+          const date = format(new Date(item.createdAt), "MMMM yyyy");
+          object[date] ??= { label: date, transactions: [] };
+          object[date].transactions.push(item);
+          return object;
+        },
+        {}
+      );
+
+      return { transactionsByMonth: Object.values(transactionByMonth) };
     }),
 
   getTransactionItems: protectedProcedure
@@ -27,7 +48,7 @@ export const transactionsRouter = createTRPCRouter({
           include: { item: true },
         });
 
-      return { transactionItems };
+      return { transactionItems: transactionItems };
     }),
 
   createPurchaseOrder: protectedProcedure

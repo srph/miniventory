@@ -29,12 +29,25 @@ const Dashboard: React.FC = () => {
 
       <div className="mb-16"></div>
 
-      <h3 className="mb-4">March 2023</h3>
-
       <Accordion.Root type="single" collapsible className="space-y-4">
-        {transactionsQuery?.transactions.map((transaction, i) => (
-          <TransactionItem key={transaction.id} transaction={transaction} />
-        ))}
+        <div className="space-y-6">
+          {transactionsQuery?.transactionsByMonth.map((group, i) => (
+            <div>
+              <h3 className="mb-4">{group.label}</h3>
+
+              <div className="space-y-2">
+                {group.transactions.map((transaction) => {
+                  return (
+                    <TransactionItem
+                      key={transaction.id}
+                      transaction={transaction}
+                    />
+                  );
+                })}
+              </div>
+            </div>
+          ))}
+        </div>
       </Accordion.Root>
     </div>
   );
