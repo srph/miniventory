@@ -62,7 +62,7 @@ model TransactionPurchaseOrder {
     // Total number of items (excluding their quantity)
     totalItems     Int
     // Sum of all items' retail price
-    totalSales     Int
+    totalSales     Float
     // Sum of all items' stock price (order.item.item.original_price) - original selling price (order.item.original_price)
     expectedProfit Float
     // Sum of all items' stock price (order.item.item.original_price) - input selling price (order.item.retail_price)
@@ -101,7 +101,7 @@ model TransactionRestockOrder {
     // Total number of items (excluding their quantity)
     totalItems     Int
     // Sum of all items' retail price
-    totalSales     Int
+    totalSales     Float
     // Per item, we get retail price - factory price
     expectedProfit Float
     // Per item, we get transaction price - factory price

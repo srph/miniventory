@@ -22,7 +22,8 @@ export const transactionsRouter = createTRPCRouter({
     .query(async ({ input }) => {
       const transactionItems =
         await prisma.transactionPurchaseOrderItems.findMany({
-          where: { id: input.transactionId },
+          // @TODO: Restock
+          where: { transactionPurchaseOrderId: input.transactionId },
           include: { item: true },
         });
 
@@ -34,13 +35,15 @@ export const transactionsRouter = createTRPCRouter({
       z.object({
         customerId: z.string().optional(),
         note: z.string().optional(),
-        items: z.array(
-          z.object({
-            itemId: z.string(),
-            quantity: z.number().min(1),
-            transactionPrice: z.number().min(1),
-          })
-        ),
+        items: z
+          .array(
+            z.object({
+              itemId: z.string(),
+              quantity: z.number().min(1),
+              transactionPrice: z.number().min(1),
+            })
+          )
+          .min(1),
       })
     )
     .mutation(async ({ input }) => {
