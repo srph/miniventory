@@ -4,13 +4,18 @@ import { createTRPCRouter, protectedProcedure } from "~/server/api/trpc";
 import { prisma } from "~/server/db";
 
 export const transactionsRouter = createTRPCRouter({
-  getAll: protectedProcedure.query(async () => {
-    const transactions = await prisma.transaction.findMany({
-      include: { purchaseOrder: true, restockOrder: true },
-    });
+  getAll: protectedProcedure
+    .input(z.object({ search: z.string().optional() }))
+    .query(async () => {
+      const transactions = await prisma.transaction.findMany({
+        include: {
+          purchaseOrder: { include: { customer: true } },
+          restockOrder: true,
+        },
+      });
 
-    return { transactions };
-  }),
+      return { transactions };
+    }),
 
   getTransactionItems: protectedProcedure
     .input(z.object({ transactionId: z.string() }))
@@ -84,7 +89,7 @@ export const transactionsRouter = createTRPCRouter({
 
       const order = await prisma.transactionPurchaseOrder.create({
         data: {
-          code: `RESTOCK-${nanoid(10)}`,
+          code: `PURCHASE-${nanoid(10)}`,
           note: input.note,
           totalItems: input.items.length,
           totalQuantity: input.items.reduce((total, transactionItem) => {

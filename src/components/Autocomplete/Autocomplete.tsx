@@ -65,7 +65,6 @@ function Autocomplete<T>({
   };
 
   const handleOpenChange = (value: boolean) => {
-    console.log("handleOpenChange", value);
     setIsOpen(value);
     handleInputChange("");
   };

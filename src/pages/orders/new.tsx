@@ -1,6 +1,7 @@
 import React, { useState, useMemo } from "react";
 import BigNumber from "bignumber.js";
 import { type NextPage } from "next";
+import { useRouter } from "next/router";
 import Head from "next/head";
 import { IoClose } from "react-icons/io5";
 import { MdVerified } from "react-icons/md";
@@ -16,6 +17,8 @@ import {
   Controller,
 } from "react-hook-form";
 const OrdersNew: NextPage = () => {
+  const { push } = useRouter();
+
   const [itemsFilter, setItemsFilter] = useState("");
 
   const [customersFilter, setCustomersFilter] = useState("");
@@ -36,10 +39,16 @@ const OrdersNew: NextPage = () => {
     search: customersFilter,
   });
 
+  const handleSuccess = () => {
+    push("/");
+  };
+
   const {
     mutate: createPurchaseOrder,
     isLoading: isCreatePurchaseOrderLoading,
-  } = api.transactions.createPurchaseOrder.useMutation();
+  } = api.transactions.createPurchaseOrder.useMutation({
+    onSuccess: handleSuccess,
+  });
 
   interface TransactionItem {
     quantity: number;
