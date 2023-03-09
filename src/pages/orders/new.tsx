@@ -2,7 +2,8 @@ import React, { useState, useMemo } from "react";
 import { type NextPage } from "next";
 import Head from "next/head";
 import * as Popover from "@radix-ui/react-popover";
-import { IoClose } from "react-icons/io5";
+import { IoCheckmarkCircle, IoClose } from "react-icons/io5";
+import { MdVerified } from "react-icons/md";
 import { Command } from "cmdk";
 import { config } from "~/config";
 import {
@@ -18,23 +19,39 @@ import { getAuthenticatedServerSideProps } from "~/server/auth";
 // <Autocomplete items={items} onSelect={} onCreate={} option={} placeholder={{ input: '' }}><Button></Autocomplete>
 
 const OrdersNew: NextPage = () => {
-  const [input, setInput] = useState("");
+  const [itemsFilter, setItemsFilter] = useState("");
 
-  const [items, setItems] = useState<Item[]>([]);
+  const [customersFilter, setCustomersFilter] = useState("");
 
   const {
     data: itemsQuery,
     isLoading: isItemsQueryLoading,
     error: itemsQueryError,
   } = api.inventory.getAll.useQuery({
-    search: input,
+    search: itemsFilter,
   });
 
-  const { data, isLoading, error } = api.customers.getAll.useQuery({
-    search: input,
+  const {
+    data: customersQuery,
+    isLoading: isCustomersQueryLoading,
+    error: customersQueryError,
+  } = api.customers.getAll.useQuery({
+    search: customersFilter,
   });
 
   type Item = NonNullable<typeof itemsQuery>["items"][number];
+
+  type Customer = NonNullable<typeof itemsQuery>["customers"][number];
+
+  const [customer, setCustomer] = useState<Customer | null>(null);
+
+  const [items, setItems] = useState<Item[]>([]);
+
+  const customers: AutocompleteOption<Customer>[] = useMemo(() => {
+    return (customersQuery?.customers ?? []).map((customer) => {
+      return { label: customer.name, value: customer.id, meta: customer };
+    });
+  }, [customersQuery]);
 
   const options: AutocompleteOption<Item>[] = useMemo(() => {
     return (itemsQuery?.items ?? []).map((item) => {
@@ -45,6 +62,10 @@ const OrdersNew: NextPage = () => {
   const selected = useMemo(() => {
     return items.map((item) => item.id);
   }, [items]);
+
+  const handleSelectCustomer = (_: string, option: Customer) => {
+    setCustomer(option);
+  };
 
   const handleSelect = (_: string, option: Item) => {
     setItems((items) => [...items, option]);
@@ -82,10 +103,10 @@ const OrdersNew: NextPage = () => {
                         {item.thumbnailUrl ? (
                           <img
                             src={item.thumbnailUrl}
-                            className="h-[24px] w-[24px] rounded"
+                            className="h-[24px] w-[24px] rounded-full"
                           />
                         ) : (
-                          <div className="h-[24px] w-[24px] rounded bg-neutral-500 group-aria-selected:bg-neutral-400" />
+                          <div className="h-[24px] w-[24px] rounded-full bg-neutral-500 group-aria-selected:bg-neutral-400" />
                         )}
 
                         <div className="flex w-full items-center justify-between gap-2">
@@ -101,7 +122,7 @@ const OrdersNew: NextPage = () => {
                     width={400}
                     isLoading={isItemsQueryLoading}
                     error={itemsQueryError}
-                    onInput={setInput}
+                    onInput={setItemsFilter}
                     onSelect={handleSelect}
                   >
                     <Button type="button" variant="primary">
@@ -123,10 +144,10 @@ const OrdersNew: NextPage = () => {
                       {item.thumbnailUrl ? (
                         <img
                           src={item.thumbnailUrl}
-                          className="h-[120px] w-[120px] rounded bg-neutral-500"
+                          className="h-[120px] w-[120px] rounded-full bg-neutral-500"
                         />
                       ) : (
-                        <div className="h-[120px] w-[120px] rounded bg-neutral-500"></div>
+                        <div className="h-[120px] w-[120px] rounded-full bg-neutral-500"></div>
                       )}
                       <div>
                         <h4 className="font-medium">{item.name}</h4>
@@ -184,7 +205,74 @@ const OrdersNew: NextPage = () => {
                     Customer
                   </label>
                   <div className="mb-4"></div>
-                  <TextInput placeholder="Search for a customer" />
+
+                  {customer == null && (
+                    <Autocomplete<Item>
+                      options={customers}
+                      selected={customer ? [customer.id] : undefined}
+                      option={({ meta: customer }) => (
+                        <div className="flex items-center gap-2 rounded px-2 py-2 group-aria-selected:bg-neutral-500">
+                          {customer.thumbnailUrl ? (
+                            <img
+                              src={customer.thumbnailUrl}
+                              className="h-[24px] w-[24px] rounded-full"
+                            />
+                          ) : (
+                            <div className="h-[24px] w-[24px] rounded-full bg-neutral-500 group-aria-selected:bg-neutral-400" />
+                          )}
+
+                          <span className="truncate text-neutral-300 group-aria-selected:text-white">
+                            {customer.name}
+                          </span>
+
+                          <span className=" text-blue-500 group-aria-selected:text-neutral-300">
+                            {customer.type === "reseller" && <MdVerified />}
+                          </span>
+                        </div>
+                      )}
+                      width={320}
+                      isLoading={isItemsQueryLoading}
+                      error={itemsQueryError}
+                      closeOnSelect
+                      onInput={setCustomersFilter}
+                      onSelect={handleSelectCustomer}
+                    >
+                      <Button type="button" full>
+                        Select Customer
+                      </Button>
+                    </Autocomplete>
+                  )}
+
+                  {Boolean(customer) && (
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-2 rounded px-2 py-2">
+                        {customer.thumbnailUrl ? (
+                          <img
+                            src={customer.thumbnailUrl}
+                            className="h-[24px] w-[24px] rounded-full"
+                          />
+                        ) : (
+                          <div className="h-[24px] w-[24px] rounded-full bg-neutral-500 group-aria-selected:bg-neutral-400" />
+                        )}
+
+                        <span className="truncate text-neutral-300 group-aria-selected:text-white">
+                          {customer.name}
+                        </span>
+
+                        <span className=" text-blue-500 group-aria-selected:text-neutral-300">
+                          {customer.type === "reseller" && <MdVerified />}
+                        </span>
+                      </div>
+
+                      <button
+                        type="button"
+                        className="flex h-[24px] w-[24px] items-center justify-center rounded-full bg-neutral-500"
+                        onClick={() => setCustomer(null)}
+                      >
+                        <IoClose />
+                      </button>
+                    </div>
+                  )}
                 </div>
 
                 <div className="mb-8"></div>

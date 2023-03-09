@@ -14,6 +14,7 @@ CREATE TABLE "Customer" (
     "email" TEXT,
     "phone" TEXT,
     "thumbnailUrl" TEXT,
+    "type" TEXT,
     "createdAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" DATETIME NOT NULL
 );

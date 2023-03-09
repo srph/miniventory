@@ -22,7 +22,7 @@ interface AutocompleteProps<T> {
   onCreate?: (value: string, meta: T) => void;
 }
 
-function DefaultOption<T>({ value, label }: AutocompleteOption<T>) {
+function DefaultOption<T>({ label }: AutocompleteOption<T>) {
   return (
     <div className="flex items-center gap-2 rounded px-2 py-2 group-aria-selected:bg-neutral-500">
       {label}
@@ -50,7 +50,6 @@ function Autocomplete<T>({
 
   const handleInputChange = (value: string) => {
     setInput(value);
-
     onInput?.(value);
   };
 
@@ -106,7 +105,7 @@ function Autocomplete<T>({
 
             <div className="mb-2"></div>
 
-            <Command.List>
+            <Command.List className="max-h-[320px] overflow-y-scroll">
               {isLoading && (
                 <Command.Loading>
                   <div className="py-2 text-center text-neutral-500">

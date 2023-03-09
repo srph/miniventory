@@ -30,6 +30,7 @@ model Customer {
     email        String?
     phone        String?
     thumbnailUrl String?
+    type         String?
     createdAt    DateTime                   @default(now())
     updatedAt    DateTime                   @updatedAt
     transactions TransactionPurchaseOrder[]

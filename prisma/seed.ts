@@ -21,11 +21,12 @@ async function main() {
     });
   }
 
-  for (let i = 0; i < 5; i++) {
+  for (let i = 0; i < 10; i++) {
     await prisma.customer.create({
       data: {
         name: faker.name.firstName(),
         thumbnailUrl: faker.image.imageUrl(),
+        type: i % 2 === 0 ? "reseller" : "retailer",
       },
     });
   }
