@@ -1,22 +1,13 @@
 import React, { useState, useMemo } from "react";
 import { type NextPage } from "next";
 import Head from "next/head";
-import * as Popover from "@radix-ui/react-popover";
-import { IoCheckmarkCircle, IoClose } from "react-icons/io5";
+import { IoClose } from "react-icons/io5";
 import { MdVerified } from "react-icons/md";
-import { Command } from "cmdk";
 import { config } from "~/config";
-import {
-  Autocomplete,
-  AutocompleteOption,
-  Button,
-  TextInput,
-} from "~/components";
+import { Autocomplete, AutocompleteOption, Button } from "~/components";
 import { AppLayout } from "~/page-components/AppLayout";
 import { api } from "~/utils/api";
 import { getAuthenticatedServerSideProps } from "~/server/auth";
-
-// <Autocomplete items={items} onSelect={} onCreate={} option={} placeholder={{ input: '' }}><Button></Autocomplete>
 
 const OrdersNew: NextPage = () => {
   const [itemsFilter, setItemsFilter] = useState("");
@@ -39,13 +30,22 @@ const OrdersNew: NextPage = () => {
     search: customersFilter,
   });
 
+  interface TransactionItem {
+    quantity: number;
+    transactionPrice: number;
+    item: Item;
+  }
+
   type Item = NonNullable<typeof itemsQuery>["items"][number];
 
   type Customer = NonNullable<typeof itemsQuery>["customers"][number];
 
-  const [customer, setCustomer] = useState<Customer | null>(null);
+  const [transactionCustomer, setTransactionCustomer] =
+    useState<Customer | null>(null);
 
-  const [items, setItems] = useState<Item[]>([]);
+  const [transactionItems, setTransactionItems] = useState<TransactionItem[]>(
+    []
+  );
 
   const customers: AutocompleteOption<Customer>[] = useMemo(() => {
     return (customersQuery?.customers ?? []).map((customer) => {
@@ -60,24 +60,37 @@ const OrdersNew: NextPage = () => {
   }, [itemsQuery]);
 
   const selected = useMemo(() => {
-    return items.map((item) => item.id);
-  }, [items]);
+    return transactionItems.map((t) => t.item.id);
+  }, [transactionItems]);
 
   const handleSelectCustomer = (_: string, option: Customer) => {
-    setCustomer(option);
+    setTransactionCustomer(option);
   };
 
   const handleSelect = (_: string, option: Item) => {
-    setItems((items) => [...items, option]);
+    setTransactionItems((items) => [
+      ...items,
+      {
+        quantity: 1,
+        transactionPrice: option.retailPrice,
+        item: option,
+      },
+    ]);
   };
 
   const handleRemove = (index: number) => {
     return () => {
-      setItems((items) => {
+      setTransactionItems((items) => {
         return items.filter((_, i) => i !== index);
       });
     };
   };
+
+  const expectedProfit = useMemo(() => {
+    return transactionItems.reduce((total, t) => {
+      return total + t.transactionPrice * t.quantity;
+    }, 0);
+  }, [transactionItems]);
 
   return (
     <>
@@ -135,25 +148,26 @@ const OrdersNew: NextPage = () => {
               <div className="mb-8"></div>
 
               <div>
-                {items.map((item, i) => (
+                {transactionItems.map((t, i) => (
                   <div
                     className="border-b-none flex items-center border-t border-l border-r border-neutral-700 bg-neutral-800 px-4 py-4 first:rounded-tl first:rounded-tr last:rounded-br last:rounded-bl last:border-b"
                     key={i}
                   >
                     <div className="flex w-[400px] shrink-0 items-center gap-4">
-                      {item.thumbnailUrl ? (
+                      {t.item.thumbnailUrl ? (
                         <img
-                          src={item.thumbnailUrl}
+                          src={t.item.thumbnailUrl}
                           className="h-[120px] w-[120px] rounded-full bg-neutral-500"
                         />
                       ) : (
                         <div className="h-[120px] w-[120px] rounded-full bg-neutral-500"></div>
                       )}
                       <div>
-                        <h4 className="font-medium">{item.name}</h4>
+                        <h4 className="font-medium">{t.item.name}</h4>
                         <div className="mb-2"></div>
                         <span className="text-neutral-400">
-                          {item.quantity} pcs / {item.retailPrice}.00 per piece
+                          {t.item.quantity} pcs / {t.item.retailPrice}.00 per
+                          piece
                         </span>
                       </div>
                     </div>
@@ -161,20 +175,22 @@ const OrdersNew: NextPage = () => {
                     <div className="w-[140px] shrink-0">
                       <h4 className="text-neutral-400">Quantity</h4>
                       <div className="mb-2"></div>
-                      <span className="font-medium">{item.quantity}</span>
+                      <span className="font-medium">{t.quantity}</span>
                     </div>
 
                     <div className="w-[140px] shrink-0">
                       <h4 className="text-neutral-400">Price</h4>
                       <div className="mb-2"></div>
-                      <span className="font-medium">{item.retailPrice}.00</span>
+                      <span className="font-medium">
+                        {t.transactionPrice}.00
+                      </span>
                     </div>
 
                     <div className="w-[140px] shrink-0">
                       <h4 className="text-neutral-400">Total</h4>
                       <div className="mb-2"></div>
                       <span className="font-medium">
-                        {item.retailPrice * item.quantity}.00
+                        {t.item.retailPrice * t.item.quantity}.00
                       </span>
                     </div>
 
@@ -206,10 +222,14 @@ const OrdersNew: NextPage = () => {
                   </label>
                   <div className="mb-4"></div>
 
-                  {customer == null && (
+                  {transactionCustomer == null && (
                     <Autocomplete<Item>
                       options={customers}
-                      selected={customer ? [customer.id] : undefined}
+                      selected={
+                        transactionCustomer
+                          ? [transactionCustomer.id]
+                          : undefined
+                      }
                       option={({ meta: customer }) => (
                         <div className="flex items-center gap-2 rounded px-2 py-2 group-aria-selected:bg-neutral-500">
                           {customer.thumbnailUrl ? (
@@ -243,12 +263,12 @@ const OrdersNew: NextPage = () => {
                     </Autocomplete>
                   )}
 
-                  {Boolean(customer) && (
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-2 rounded px-2 py-2">
-                        {customer.thumbnailUrl ? (
+                  {Boolean(transactionCustomer) && (
+                    <div className="flex items-center justify-between rounded border border-neutral-700 px-2 py-2">
+                      <div className="flex items-center gap-2 rounded">
+                        {transactionCustomer.thumbnailUrl ? (
                           <img
-                            src={customer.thumbnailUrl}
+                            src={transactionCustomer.thumbnailUrl}
                             className="h-[24px] w-[24px] rounded-full"
                           />
                         ) : (
@@ -256,18 +276,20 @@ const OrdersNew: NextPage = () => {
                         )}
 
                         <span className="truncate text-neutral-300 group-aria-selected:text-white">
-                          {customer.name}
+                          {transactionCustomer.name}
                         </span>
 
                         <span className=" text-blue-500 group-aria-selected:text-neutral-300">
-                          {customer.type === "reseller" && <MdVerified />}
+                          {transactionCustomer.type === "reseller" && (
+                            <MdVerified />
+                          )}
                         </span>
                       </div>
 
                       <button
                         type="button"
                         className="flex h-[24px] w-[24px] items-center justify-center rounded-full bg-neutral-500"
-                        onClick={() => setCustomer(null)}
+                        onClick={() => setTransactionCustomer(null)}
                       >
                         <IoClose />
                       </button>
@@ -290,7 +312,7 @@ const OrdersNew: NextPage = () => {
                       Expected Profit
                     </label>
 
-                    <div>2,320.00</div>
+                    <div>{expectedProfit}.00</div>
                   </div>
                   <div className="flex items-center justify-between">
                     <label className="font-medium text-neutral-400">
