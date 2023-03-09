@@ -16,7 +16,7 @@ const Inventory: React.FC = () => {
         <div className="w-[400px]">
           <input
             type="text"
-            placeholder="Search for inventory"
+            placeholder="Search for an item by name"
             className="block w-full rounded border border-neutral-700 bg-neutral-800 py-3 px-3"
             onChange={(e) => setSearch(e.target.value)}
           />
@@ -24,6 +24,7 @@ const Inventory: React.FC = () => {
 
         <div className="flex items-center gap-3">
           <Button>Stock</Button>
+          <Button variant="primary">New Product</Button>
         </div>
       </div>
 

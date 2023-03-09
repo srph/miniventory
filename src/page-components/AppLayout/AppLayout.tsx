@@ -62,13 +62,16 @@ const AppLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
               <div className="flex items-center gap-6">
                 {pathname === "/" && (
                   <Button variant="primary" onClick={() => push("/orders/new")}>
-                    New Purchase Order
+                    Purchase
                   </Button>
                 )}
 
                 {pathname === "/inventory" && (
-                  <Button variant="primary" onClick={() => push("/orders/new")}>
-                    New Item
+                  <Button
+                    variant="primary"
+                    onClick={() => push("/inventory/restock")}
+                  >
+                    Restock
                   </Button>
                 )}
 

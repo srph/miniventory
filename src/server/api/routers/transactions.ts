@@ -3,6 +3,7 @@ import { z } from "zod";
 import { createTRPCRouter, protectedProcedure } from "~/server/api/trpc";
 import { prisma } from "~/server/db";
 import { format } from "date-fns";
+import BigNumber from "bignumber.js";
 
 export const transactionsRouter = createTRPCRouter({
   getAll: protectedProcedure
@@ -75,11 +76,6 @@ export const transactionsRouter = createTRPCRouter({
         },
       });
 
-      // Basic validation to ensure all items are found
-      if (items.length !== input.items.length) {
-        throw new Error("Unable to find all provided items");
-      }
-
       // Map transaction items to their corresponding
       // database item to avoid multiple lookups
       const clusteredItems = input.items.map((transactionItem) => {
@@ -114,7 +110,7 @@ export const transactionsRouter = createTRPCRouter({
           totalSales: clusteredItems.reduce((total, { transactionItem }) => {
             return total + transactionItem.transactionPrice;
           }, 0),
-          expectedProfit: clusteredItems.reduce((total, { item }) => {
+          totalExpectedProfit: clusteredItems.reduce((total, { item }) => {
             return total + item.retailPrice - item.factoryPrice;
           }, 0),
           totalProfit: clusteredItems.reduce((total, clusteredItem) => {
@@ -152,6 +148,107 @@ export const transactionsRouter = createTRPCRouter({
         data: {
           type: "purchase",
           purchaseOrder: {
+            connect: { id: order.id },
+          },
+        },
+      });
+
+      return { transaction };
+    }),
+
+  createRestockOrder: protectedProcedure
+    .input(
+      z.object({
+        note: z.string().optional(),
+        shippingFee: z.number().optional(),
+        items: z
+          .array(
+            z.object({
+              itemId: z.string(),
+              quantity: z.number().min(1),
+              retailPrice: z.number().min(1),
+              factoryPrice: z.number().min(1),
+            })
+          )
+          .min(1),
+      })
+    )
+    .mutation(async ({ input }) => {
+      // @FUTURE: Add order price validation
+      const items = await prisma.item.findMany({
+        where: {
+          id: { in: input.items.map((item) => item.itemId) },
+        },
+      });
+
+      // Map transaction items to their corresponding
+      // database item to avoid multiple lookups
+      const clusteredItems = input.items.map((transactionItem) => {
+        const item = items.find((item) => {
+          return item.id === transactionItem.itemId;
+        });
+
+        if (item == null) {
+          throw new Error(`Unable to find item ${transactionItem.itemId}`);
+        }
+
+        return { item, transactionItem };
+      });
+
+      const order = await prisma.transactionRestockOrder.create({
+        data: {
+          code: `RESTOCK-${nanoid(10)}`,
+          note: input.note,
+          shippingFee: input.shippingFee,
+          totalItems: input.items.length,
+          totalQuantity: input.items.reduce((total, transactionItem) => {
+            return total + transactionItem.quantity;
+          }, 0),
+          totalOriginalRevenue: clusteredItems.reduce((total, { item }) => {
+            return total + item.retailPrice;
+          }, 0),
+          totalOriginalExpenses: clusteredItems.reduce((total, { item }) => {
+            return total + item.factoryPrice;
+          }, 0),
+          totalRevenue: clusteredItems.reduce((total, { transactionItem }) => {
+            return total + transactionItem.retailPrice;
+          }, 0),
+          totalExpenses: clusteredItems.reduce((total, { transactionItem }) => {
+            return total + transactionItem.factoryPrice;
+          }, 0),
+          items: {
+            create: clusteredItems.map(({ item, transactionItem }) => {
+              return {
+                item: {
+                  connect: { id: transactionItem.itemId },
+                },
+                quantity: transactionItem.quantity,
+                originalFactoryPrice: item.factoryPrice,
+                originalRetailPrice: item.retailPrice,
+                factoryPrice: transactionItem.factoryPrice,
+                retailPrice: transactionItem.retailPrice,
+              };
+            }),
+          },
+        },
+      });
+
+      // Persist the increased quantities and updated prices to the database
+      for (const { item, transactionItem } of clusteredItems) {
+        await prisma.item.update({
+          where: { id: item.id },
+          data: {
+            quantity: item.quantity + transactionItem.quantity,
+            factoryPrice: transactionItem.factoryPrice,
+            retailPrice: transactionItem.retailPrice,
+          },
+        });
+      }
+
+      const transaction = await prisma.transaction.create({
+        data: {
+          type: "purchase",
+          restockOrder: {
             connect: { id: order.id },
           },
         },

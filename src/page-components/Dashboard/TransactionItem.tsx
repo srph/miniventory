@@ -65,7 +65,9 @@ const TransactionItem: React.FC = ({ transaction }) => {
           </span>
 
           <Accordion.Trigger>
-            <IoCaretDown />
+            <span className="text-neutral-300">
+              <IoCaretDown />
+            </span>
           </Accordion.Trigger>
         </div>
       </Accordion.Header>
