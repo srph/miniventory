@@ -2,7 +2,7 @@ import { type NextPage } from "next";
 import Head from "next/head";
 import { config } from "~/config";
 import { AppLayout } from "~/page-components/AppLayout";
-import { Dashboard } from "~/page-components/Dashboard";
+import { Inventory } from "~/page-components/Inventory";
 import { getAuthenticatedServerSideProps } from "~/server/auth";
 import { api } from "~/utils/api";
 
@@ -19,7 +19,7 @@ const InventoryPage: NextPage = () => {
       </Head>
 
       <AppLayout>
-        <Dashboard />
+        <Inventory />
       </AppLayout>
     </>
   );

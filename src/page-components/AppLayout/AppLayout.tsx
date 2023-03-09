@@ -1,14 +1,15 @@
 import React from "react";
+import cx from "classnames";
+import Boring from "boring-avatars";
 import Link from "next/link";
 import { useRouter } from "next/router";
-import Boring from "boring-avatars";
 import { Button } from "~/components";
-import { useSession } from "next-auth/react";
+import { signOut, useSession } from "next-auth/react";
 
 const AppLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const { data } = useSession();
 
-  const { push } = useRouter();
+  const { pathname, push } = useRouter();
 
   if (data?.user === undefined) {
     throw new Error("User is not logged in.");
@@ -23,42 +24,73 @@ const AppLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
               <div className="flex items-center gap-3">
                 <Link
                   href="/"
-                  className="rounded bg-neutral-500 px-3 py-3 font-medium"
+                  className={cx("rounded px-3 py-3 font-medium", {
+                    "text-neutral-400 ": pathname !== "/",
+                    "bg-neutral-500 text-white": pathname === "/",
+                  })}
                 >
                   Dashboard
                 </Link>
 
                 <Link
                   href="/inventory"
-                  className="rounded px-3 py-3 font-medium text-neutral-400 hover:text-white"
+                  className={cx(
+                    "rounded px-3 py-3 font-medium  hover:text-white",
+                    {
+                      "text-neutral-400 ": pathname !== "/inventory",
+                      "bg-neutral-500 text-white": pathname === "/inventory",
+                    }
+                  )}
                 >
                   Inventory
                 </Link>
 
                 <Link
                   href="/customers"
-                  className="rounded px-3 py-3 font-medium text-neutral-400 hover:text-white"
+                  className={cx(
+                    "rounded px-3 py-3 font-medium  hover:text-white",
+                    {
+                      "text-neutral-400 ": pathname !== "/customers",
+                      "bg-neutral-500 text-white": pathname === "/customers",
+                    }
+                  )}
                 >
                   Customers
                 </Link>
               </div>
 
               <div className="flex items-center gap-6">
-                <Button variant="primary" onClick={() => push("/orders/new")}>
-                  New
-                </Button>
+                {pathname === "/" && (
+                  <Button variant="primary" onClick={() => push("/orders/new")}>
+                    New Purchase Order
+                  </Button>
+                )}
 
-                <Boring
-                  size={40}
-                  colors={[
-                    "#0F7D7E",
-                    "#76B5A0",
-                    "#FFFDD1",
-                    "#FF7575",
-                    "#D33649",
-                  ]}
-                  name={data.user.name}
-                />
+                {pathname === "/inventory" && (
+                  <Button variant="primary" onClick={() => push("/orders/new")}>
+                    New Item
+                  </Button>
+                )}
+
+                {pathname === "/customers" && (
+                  <Button variant="primary" onClick={() => push("/orders/new")}>
+                    New Customer
+                  </Button>
+                )}
+
+                <button type="button" onClick={() => signOut()}>
+                  <Boring
+                    size={40}
+                    colors={[
+                      "#0F7D7E",
+                      "#76B5A0",
+                      "#FFFDD1",
+                      "#FF7575",
+                      "#D33649",
+                    ]}
+                    name={data.user.name}
+                  />
+                </button>
               </div>
             </div>
           </div>
