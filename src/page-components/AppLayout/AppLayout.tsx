@@ -67,6 +67,8 @@ const AppLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
         <div className="mb-10"></div>
 
         {children}
+
+        <div className="h-[120px]"></div>
       </main>
     </>
   );

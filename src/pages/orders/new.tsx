@@ -1,4 +1,5 @@
 import React, { useState, useMemo } from "react";
+import BigNumber from "bignumber.js";
 import { type NextPage } from "next";
 import Head from "next/head";
 import { IoClose } from "react-icons/io5";
@@ -8,7 +9,12 @@ import { Autocomplete, AutocompleteOption, Button } from "~/components";
 import { AppLayout } from "~/page-components/AppLayout";
 import { api } from "~/utils/api";
 import { getAuthenticatedServerSideProps } from "~/server/auth";
-
+import {
+  useForm,
+  useFieldArray,
+  FormProvider,
+  Controller,
+} from "react-hook-form";
 const OrdersNew: NextPage = () => {
   const [itemsFilter, setItemsFilter] = useState("");
 
@@ -30,6 +36,11 @@ const OrdersNew: NextPage = () => {
     search: customersFilter,
   });
 
+  const {
+    mutate: createPurchaseOrder,
+    isLoading: isCreatePurchaseOrderLoading,
+  } = api.transactions.createPurchaseOrder.useMutation();
+
   interface TransactionItem {
     quantity: number;
     transactionPrice: number;
@@ -40,12 +51,23 @@ const OrdersNew: NextPage = () => {
 
   type Customer = NonNullable<typeof itemsQuery>["customers"][number];
 
-  const [transactionCustomer, setTransactionCustomer] =
-    useState<Customer | null>(null);
+  interface FormState {
+    customer: Customer | null;
+    items: TransactionItem[];
+  }
 
-  const [transactionItems, setTransactionItems] = useState<TransactionItem[]>(
-    []
-  );
+  const form = useForm<FormState>({
+    defaultValues: { customer: null, items: [] },
+  });
+
+  const { register, handleSubmit, watch } = form;
+
+  const fields = useFieldArray({
+    control: form.control,
+    name: "items",
+  });
+
+  const [transactionItems] = watch(["items"]);
 
   const customers: AutocompleteOption<Customer>[] = useMemo(() => {
     return (customersQuery?.customers ?? []).map((customer) => {
@@ -63,34 +85,42 @@ const OrdersNew: NextPage = () => {
     return transactionItems.map((t) => t.item.id);
   }, [transactionItems]);
 
-  const handleSelectCustomer = (_: string, option: Customer) => {
-    setTransactionCustomer(option);
+  const handlePrependItem = (_: string, option: Item) => {
+    fields.prepend({
+      quantity: 1,
+      transactionPrice: option.retailPrice,
+      item: option,
+    });
   };
 
-  const handleSelect = (_: string, option: Item) => {
-    setTransactionItems((items) => [
-      ...items,
-      {
-        quantity: 1,
-        transactionPrice: option.retailPrice,
-        item: option,
-      },
-    ]);
-  };
+  const onSubmit = handleSubmit((values) => {
+    createPurchaseOrder({
+      customerId: values.customer?.id,
+      items: values.items.map((t) => ({
+        itemId: t.item.id,
+        quantity: t.quantity,
+        transactionPrice: t.transactionPrice,
+      })),
+    });
+  });
 
-  const handleRemove = (index: number) => {
-    return () => {
-      setTransactionItems((items) => {
-        return items.filter((_, i) => i !== index);
-      });
-    };
-  };
-
-  const expectedProfit = useMemo(() => {
+  const totalSales = useMemo(() => {
     return transactionItems.reduce((total, t) => {
       return total + t.transactionPrice * t.quantity;
     }, 0);
-  }, [transactionItems]);
+  }, [fields, transactionItems]);
+
+  const expectedProfit = useMemo(() => {
+    return transactionItems.reduce((total, t) => {
+      return total + t.item.factoryPrice - t.item.retailPrice * t.quantity;
+    }, 0);
+  }, [fields, transactionItems]);
+
+  const totalProfit = useMemo(() => {
+    return transactionItems.reduce((total, t) => {
+      return total + t.item.factoryPrice - t.transactionPrice * t.quantity;
+    }, 0);
+  }, [fields, transactionItems]);
 
   return (
     <>
@@ -101,237 +131,295 @@ const OrdersNew: NextPage = () => {
       </Head>
 
       <AppLayout>
-        <div className="mx-auto w-[1280px] px-2">
-          <div className="flex gap-12">
-            <div className="w-full">
-              <div className="flex items-center justify-between">
-                <h2 className="text-2xl">New Purchase Order</h2>
+        <FormProvider {...form}>
+          <form onSubmit={onSubmit}>
+            <div className="mx-auto w-[1280px] px-2">
+              <div className="flex gap-12">
+                <div className="w-full">
+                  <div className="flex items-center justify-between">
+                    <h2 className="text-2xl">New Purchase Order</h2>
 
-                <div>
-                  <Autocomplete<Item>
-                    options={options}
-                    selected={selected}
-                    option={({ meta: item }) => (
-                      <div className="flex items-center gap-2 rounded px-2 py-2 group-aria-selected:bg-neutral-500">
-                        {item.thumbnailUrl ? (
-                          <img
-                            src={item.thumbnailUrl}
-                            className="h-[24px] w-[24px] rounded-full"
-                          />
-                        ) : (
-                          <div className="h-[24px] w-[24px] rounded-full bg-neutral-500 group-aria-selected:bg-neutral-400" />
+                    <div>
+                      <Autocomplete<Item>
+                        options={options}
+                        selected={selected}
+                        option={({ meta: item }) => (
+                          <div className="flex items-center gap-2 rounded px-2 py-2 group-aria-selected:bg-neutral-500">
+                            {item.thumbnailUrl ? (
+                              <img
+                                src={item.thumbnailUrl}
+                                className="h-[24px] w-[24px] rounded-full"
+                              />
+                            ) : (
+                              <div className="h-[24px] w-[24px] rounded-full bg-neutral-500 group-aria-selected:bg-neutral-400" />
+                            )}
+
+                            <div className="flex w-full items-center justify-between gap-2">
+                              <span className="w-full truncate text-neutral-300 group-aria-selected:text-white">
+                                {item.name}
+                              </span>
+                              <span className="shrink-0 text-neutral-500 group-aria-selected:text-neutral-300">
+                                ({item.quantity} pcs)
+                              </span>
+                            </div>
+                          </div>
                         )}
-
-                        <div className="flex w-full items-center justify-between gap-2">
-                          <span className="w-full truncate text-neutral-300 group-aria-selected:text-white">
-                            {item.name}
-                          </span>
-                          <span className="shrink-0 text-neutral-500 group-aria-selected:text-neutral-300">
-                            ({item.quantity} pcs)
-                          </span>
-                        </div>
-                      </div>
-                    )}
-                    width={400}
-                    isLoading={isItemsQueryLoading}
-                    error={itemsQueryError}
-                    onInput={setItemsFilter}
-                    onSelect={handleSelect}
-                  >
-                    <Button type="button" variant="primary">
-                      Add Item
-                    </Button>
-                  </Autocomplete>
-                </div>
-              </div>
-
-              <div className="mb-8"></div>
-
-              <div>
-                {transactionItems.map((t, i) => (
-                  <div
-                    className="border-b-none flex items-center border-t border-l border-r border-neutral-700 bg-neutral-800 px-4 py-4 first:rounded-tl first:rounded-tr last:rounded-br last:rounded-bl last:border-b"
-                    key={i}
-                  >
-                    <div className="flex w-[400px] shrink-0 items-center gap-4">
-                      {t.item.thumbnailUrl ? (
-                        <img
-                          src={t.item.thumbnailUrl}
-                          className="h-[120px] w-[120px] rounded-full bg-neutral-500"
-                        />
-                      ) : (
-                        <div className="h-[120px] w-[120px] rounded-full bg-neutral-500"></div>
-                      )}
-                      <div>
-                        <h4 className="font-medium">{t.item.name}</h4>
-                        <div className="mb-2"></div>
-                        <span className="text-neutral-400">
-                          {t.item.quantity} pcs / {t.item.retailPrice}.00 per
-                          piece
-                        </span>
-                      </div>
-                    </div>
-
-                    <div className="w-[140px] shrink-0">
-                      <h4 className="text-neutral-400">Quantity</h4>
-                      <div className="mb-2"></div>
-                      <span className="font-medium">{t.quantity}</span>
-                    </div>
-
-                    <div className="w-[140px] shrink-0">
-                      <h4 className="text-neutral-400">Price</h4>
-                      <div className="mb-2"></div>
-                      <span className="font-medium">
-                        {t.transactionPrice}.00
-                      </span>
-                    </div>
-
-                    <div className="w-[140px] shrink-0">
-                      <h4 className="text-neutral-400">Total</h4>
-                      <div className="mb-2"></div>
-                      <span className="font-medium">
-                        {t.item.retailPrice * t.item.quantity}.00
-                      </span>
-                    </div>
-
-                    <div className="w-full">
-                      <button
-                        type="button"
-                        className="flex h-[24px] w-[24px] items-center justify-center rounded-full bg-neutral-500"
-                        onClick={handleRemove(i)}
+                        width={400}
+                        closeOnSelect={false}
+                        isLoading={isItemsQueryLoading}
+                        error={itemsQueryError}
+                        onInput={setItemsFilter}
+                        onSelect={handlePrependItem}
                       >
-                        <IoClose />
-                      </button>
+                        <Button type="button" variant="primary">
+                          Add Item
+                        </Button>
+                      </Autocomplete>
                     </div>
                   </div>
-                ))}
-              </div>
-            </div>
 
-            <div className="w-[360px] shrink-0">
-              <div className="flex h-[40px] items-center">
-                <h2 className="transform text-2xl">Order Summary</h2>
-              </div>
+                  <div className="mb-8"></div>
 
-              <div className="mb-8"></div>
+                  <div>
+                    {fields.fields.map((field, i) => {
+                      const t = transactionItems[i];
 
-              <div className="rounded border border-neutral-700 bg-neutral-800 px-4 py-4">
-                <div>
-                  <label className="font-medium text-neutral-400">
-                    Customer
-                  </label>
-                  <div className="mb-4"></div>
-
-                  {transactionCustomer == null && (
-                    <Autocomplete<Item>
-                      options={customers}
-                      selected={
-                        transactionCustomer
-                          ? [transactionCustomer.id]
-                          : undefined
+                      if (t == null) {
+                        throw new Error("Transaction item not found.");
                       }
-                      option={({ meta: customer }) => (
-                        <div className="flex items-center gap-2 rounded px-2 py-2 group-aria-selected:bg-neutral-500">
-                          {customer.thumbnailUrl ? (
-                            <img
-                              src={customer.thumbnailUrl}
-                              className="h-[24px] w-[24px] rounded-full"
+
+                      return (
+                        <div
+                          className="border-b-none flex items-center border-t border-l border-r border-neutral-700 bg-neutral-800 px-4 py-4 first:rounded-tl first:rounded-tr last:rounded-br last:rounded-bl last:border-b"
+                          key={field.id}
+                        >
+                          <div className="flex w-[400px] shrink-0 items-center gap-4">
+                            {t.item.thumbnailUrl ? (
+                              <img
+                                src={t.item.thumbnailUrl}
+                                className="h-[120px] w-[120px] rounded-full bg-neutral-500"
+                              />
+                            ) : (
+                              <div className="h-[120px] w-[120px] rounded-full bg-neutral-500"></div>
+                            )}
+                            <div>
+                              <h4 className="font-medium">{t.item.name}</h4>
+                              <div className="mb-2"></div>
+                              <span className="text-neutral-400">
+                                {t.item.quantity} pcs / {t.item.retailPrice}.00
+                                per piece
+                              </span>
+                            </div>
+                          </div>
+
+                          <div className="w-[140px] shrink-0">
+                            <h4 className="font-medium text-neutral-400">
+                              Quantity
+                            </h4>
+                            <div className="mb-2"></div>
+
+                            <Controller
+                              name={`items.${i}.quantity`}
+                              control={form.control}
+                              render={({ field }) => {
+                                return (
+                                  <input
+                                    type="text"
+                                    placeholder="1"
+                                    className="block h-[14px] w-full border-none bg-transparent leading-none text-white focus:outline-0"
+                                    {...field}
+                                  />
+                                );
+                              }}
                             />
-                          ) : (
-                            <div className="h-[24px] w-[24px] rounded-full bg-neutral-500 group-aria-selected:bg-neutral-400" />
-                          )}
+                          </div>
 
-                          <span className="truncate text-neutral-300 group-aria-selected:text-white">
-                            {customer.name}
-                          </span>
+                          <div className="w-[140px] shrink-0">
+                            <h4 className="font-medium text-neutral-400">
+                              Price
+                            </h4>
+                            <div className="mb-2"></div>
+                            <Controller
+                              name={`items.${i}.transactionPrice`}
+                              control={form.control}
+                              render={({ field }) => {
+                                return (
+                                  <input
+                                    type="text"
+                                    placeholder="1"
+                                    className="block h-[14px] w-full border-none bg-transparent leading-none text-white focus:outline-0"
+                                    {...field}
+                                  />
+                                );
+                              }}
+                            />
+                          </div>
 
-                          <span className=" text-blue-500 group-aria-selected:text-neutral-300">
-                            {customer.type === "reseller" && <MdVerified />}
-                          </span>
+                          <div className="w-[140px] shrink-0">
+                            <h4 className="font-medium text-neutral-400">
+                              Total
+                            </h4>
+                            <div className="mb-2"></div>
+
+                            <span>
+                              {new BigNumber(
+                                t.transactionPrice * t.quantity
+                              ).toFormat(2)}
+                            </span>
+                          </div>
+
+                          <div className="w-full">
+                            <button
+                              type="button"
+                              className="flex h-[24px] w-[24px] items-center justify-center rounded-full bg-neutral-500"
+                              onClick={() => fields.remove(i)}
+                            >
+                              <IoClose />
+                            </button>
+                          </div>
                         </div>
-                      )}
-                      width={320}
-                      isLoading={isItemsQueryLoading}
-                      error={itemsQueryError}
-                      closeOnSelect
-                      onInput={setCustomersFilter}
-                      onSelect={handleSelectCustomer}
-                    >
-                      <Button type="button" full>
-                        Select Customer
-                      </Button>
-                    </Autocomplete>
-                  )}
+                      );
+                    })}
+                  </div>
+                </div>
 
-                  {Boolean(transactionCustomer) && (
-                    <div className="flex items-center justify-between rounded border border-neutral-700 px-2 py-2">
-                      <div className="flex items-center gap-2 rounded">
-                        {transactionCustomer.thumbnailUrl ? (
-                          <img
-                            src={transactionCustomer.thumbnailUrl}
-                            className="h-[24px] w-[24px] rounded-full"
-                          />
-                        ) : (
-                          <div className="h-[24px] w-[24px] rounded-full bg-neutral-500 group-aria-selected:bg-neutral-400" />
-                        )}
+                <div className="w-[360px] shrink-0">
+                  <div className="flex h-[40px] items-center">
+                    <h2 className="transform text-2xl">Order Summary</h2>
+                  </div>
 
-                        <span className="truncate text-neutral-300 group-aria-selected:text-white">
-                          {transactionCustomer.name}
-                        </span>
+                  <div className="mb-8"></div>
 
-                        <span className=" text-blue-500 group-aria-selected:text-neutral-300">
-                          {transactionCustomer.type === "reseller" && (
-                            <MdVerified />
-                          )}
-                        </span>
+                  <div className="rounded border border-neutral-700 bg-neutral-800 px-4 py-4">
+                    <div>
+                      <label className="font-medium text-neutral-400">
+                        Customer
+                      </label>
+                      <div className="mb-4"></div>
+
+                      <Controller
+                        control={form.control}
+                        name="customer"
+                        render={({ field }) => {
+                          if (field.value == null) {
+                            return (
+                              <Autocomplete<Item>
+                                options={customers}
+                                option={({ meta: customer }) => (
+                                  <div className="flex items-center gap-2 rounded px-2 py-2 group-aria-selected:bg-neutral-500">
+                                    {customer.thumbnailUrl ? (
+                                      <img
+                                        src={customer.thumbnailUrl}
+                                        className="h-[24px] w-[24px] rounded-full"
+                                      />
+                                    ) : (
+                                      <div className="h-[24px] w-[24px] rounded-full bg-neutral-500 group-aria-selected:bg-neutral-400" />
+                                    )}
+
+                                    <span className="truncate text-neutral-300 group-aria-selected:text-white">
+                                      {customer.name}
+                                    </span>
+
+                                    <span className=" text-blue-500 group-aria-selected:text-neutral-300">
+                                      {customer.type === "reseller" && (
+                                        <MdVerified />
+                                      )}
+                                    </span>
+                                  </div>
+                                )}
+                                width={320}
+                                isLoading={isItemsQueryLoading}
+                                error={itemsQueryError}
+                                onInput={setCustomersFilter}
+                                onSelect={(_, option) => field.onChange(option)}
+                              >
+                                <Button type="button" full>
+                                  Select Customer
+                                </Button>
+                              </Autocomplete>
+                            );
+                          }
+
+                          return (
+                            <div className="flex items-center justify-between rounded border border-neutral-700 px-2 py-2">
+                              <div className="flex items-center gap-2 rounded">
+                                {field.value.thumbnailUrl ? (
+                                  <img
+                                    src={field.value.thumbnailUrl}
+                                    className="h-[24px] w-[24px] rounded-full"
+                                  />
+                                ) : (
+                                  <div className="h-[24px] w-[24px] rounded-full bg-neutral-500 group-aria-selected:bg-neutral-400" />
+                                )}
+
+                                <span className="truncate text-neutral-300 group-aria-selected:text-white">
+                                  {field.value.name}
+                                </span>
+
+                                <span className=" text-blue-500 group-aria-selected:text-neutral-300">
+                                  {field.value.type === "reseller" && (
+                                    <MdVerified />
+                                  )}
+                                </span>
+                              </div>
+
+                              <button
+                                type="button"
+                                className="flex h-[24px] w-[24px] items-center justify-center rounded-full bg-neutral-500"
+                                onClick={() => field.onChange(null)}
+                              >
+                                <IoClose />
+                              </button>
+                            </div>
+                          );
+                        }}
+                      />
+                    </div>
+
+                    <div className="mb-8"></div>
+
+                    <div className="space-y-4">
+                      <div className="flex items-center justify-between">
+                        <label className="font-medium text-neutral-400">
+                          Total Sales
+                        </label>
+
+                        <div>{new BigNumber(totalSales).toFormat(2)}</div>
                       </div>
 
-                      <button
-                        type="button"
-                        className="flex h-[24px] w-[24px] items-center justify-center rounded-full bg-neutral-500"
-                        onClick={() => setTransactionCustomer(null)}
-                      >
-                        <IoClose />
-                      </button>
+                      <div className="flex items-center justify-between">
+                        <label className="font-medium text-neutral-400">
+                          Expected Profit
+                        </label>
+
+                        <div>{new BigNumber(expectedProfit).toFormat(2)}</div>
+                      </div>
+
+                      <div className="flex items-center justify-between">
+                        <label className="font-medium text-neutral-400">
+                          Total Profit
+                        </label>
+
+                        <div>{new BigNumber(totalProfit).toFormat(2)}</div>
+                      </div>
                     </div>
-                  )}
-                </div>
 
-                <div className="mb-8"></div>
+                    <div className="mb-8"></div>
 
-                <div className="space-y-4">
-                  <div className="flex items-center justify-between">
-                    <label className="font-medium text-neutral-400">
-                      Total Sales
-                    </label>
-
-                    <div>2,320.00</div>
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <label className="font-medium text-neutral-400">
-                      Expected Profit
-                    </label>
-
-                    <div>{expectedProfit}.00</div>
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <label className="font-medium text-neutral-400">
-                      Total Profit
-                    </label>
-
-                    <div>2,320.00</div>
+                    <Button
+                      full
+                      type="submit"
+                      variant="primary"
+                      disabled={isCreatePurchaseOrderLoading}
+                    >
+                      Confirm Purchase Order
+                    </Button>
                   </div>
                 </div>
-
-                <div className="mb-8"></div>
-
-                <Button full variant="primary">
-                  Confirm Purchase Order
-                </Button>
               </div>
             </div>
-          </div>
-        </div>
+          </form>
+        </FormProvider>
       </AppLayout>
     </>
   );

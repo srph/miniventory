@@ -35,7 +35,7 @@ function Autocomplete<T>({
   option = DefaultOption,
   isLoading,
   selected,
-  closeOnSelect,
+  closeOnSelect = true,
   width = 320,
   onInput,
   onSelect,
@@ -65,6 +65,7 @@ function Autocomplete<T>({
   };
 
   const handleOpenChange = (value: boolean) => {
+    console.log("handleOpenChange", value);
     setIsOpen(value);
     handleInputChange("");
   };
