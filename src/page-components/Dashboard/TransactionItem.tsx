@@ -1,8 +1,9 @@
+import { formatDistanceToNow } from "date-fns";
 import { BigNumber } from "bignumber.js";
 import Boring from "boring-avatars";
 import { AiOutlineArrowUp, AiOutlineArrowDown } from "react-icons/ai";
 import { IoCaretDown } from "react-icons/io5";
-import { formatDistanceToNow } from "date-fns";
+import * as Accordion from "@radix-ui/react-accordion";
 import { api } from "~/utils/api";
 
 const TransactionItem: React.FC = ({ transaction }) => {
@@ -10,11 +11,12 @@ const TransactionItem: React.FC = ({ transaction }) => {
     transactionId: transaction.purchaseOrder.id,
   });
 
-  console.log(itemsQuery);
-
   return (
-    <div className="rounded bg-neutral-500">
-      <div className="flex items-center py-3 px-3">
+    <Accordion.Item
+      value={transaction.id}
+      className="overflow-hidden rounded bg-neutral-500"
+    >
+      <Accordion.Header className="flex items-center py-3 px-3">
         <div className="w-[240px] shrink-0">
           {transaction.purchaseOrder.code}
         </div>
@@ -36,9 +38,11 @@ const TransactionItem: React.FC = ({ transaction }) => {
             </span>
           )}
         </div>
+
         <div className="w-[200px] shrink-0">
           {transaction.purchaseOrder.totalQuantity} units purchased
         </div>
+
         <div className="w-[200px] shrink-0">
           <div className="flex items-center gap-2">
             {transaction.purchaseOrder.totalProfit > 0 && (
@@ -64,64 +68,71 @@ const TransactionItem: React.FC = ({ transaction }) => {
             {formatDistanceToNow(new Date(transaction.purchaseOrder.createdAt))}{" "}
             ago
           </span>
-          <IoCaretDown />
+
+          <Accordion.Trigger>
+            <IoCaretDown />
+          </Accordion.Trigger>
         </div>
-      </div>
+      </Accordion.Header>
 
-      <div className="py-3 px-3">
-        <div className="flex items-center">
-          <div className="w-[440px]">
-            <div className="font-medium text-neutral-300">Unit</div>
+      <Accordion.Content className="overflow-hidden py-3 px-3">
+        <div>
+          <div className="flex items-center">
+            <div className="w-[440px]">
+              <div className="font-medium text-neutral-300">Unit</div>
+            </div>
+
+            <div className="w-[200px]">
+              <div className="font-medium text-neutral-300">Price</div>
+            </div>
+
+            <div className="w-[200px]">
+              <div className="font-medium text-neutral-300">Total</div>
+            </div>
           </div>
 
-          <div className="w-[200px]">
-            <div className="font-medium text-neutral-300">Price</div>
-          </div>
+          <div className="mb-4"></div>
 
-          <div className="w-[200px]">
-            <div className="font-medium text-neutral-300">Total</div>
-          </div>
-        </div>
+          <div className="space-y-2">
+            {itemsQuery?.transactionItems.map((t, i) => {
+              return (
+                <div className="flex items-center" key={i}>
+                  <div className="w-[440px]">
+                    <div className="flex items-center gap-2">
+                      {t.item.thumbnailUrl ? (
+                        <img
+                          src={t.item.thumbnailUrl}
+                          className="h-[24px] w-[24px] rounded"
+                        />
+                      ) : (
+                        <div className="h-[24px] w-[24px] rounded bg-neutral-800" />
+                      )}
 
-        <div className="mb-4"></div>
+                      <span>
+                        {t.item.name}{" "}
+                        <span className="text-neutral-300">
+                          ({t.quantity}x)
+                        </span>
+                      </span>
+                    </div>
+                  </div>
 
-        <div className="space-y-2">
-          {itemsQuery?.transactionItems.map((t, i) => {
-            return (
-              <div className="flex items-center" key={i}>
-                <div className="w-[440px]">
-                  <div className="flex items-center gap-2">
-                    {t.item.thumbnailUrl ? (
-                      <img
-                        src={t.item.thumbnailUrl}
-                        className="h-[24px] w-[24px] rounded"
-                      />
-                    ) : (
-                      <div className="h-[24px] w-[24px] rounded bg-neutral-800" />
-                    )}
+                  <div className="w-[200px]">
+                    {new BigNumber(t.transactionPrice).toFormat(2)}
+                  </div>
 
-                    <span>
-                      {t.item.name}{" "}
-                      <span className="text-neutral-300">({t.quantity}x)</span>
-                    </span>
+                  <div className="w-[200px]">
+                    {new BigNumber(t.transactionPrice)
+                      .multipliedBy(t.quantity)
+                      .toFormat(2)}
                   </div>
                 </div>
-
-                <div className="w-[200px]">
-                  {new BigNumber(t.transactionPrice).toFormat(2)}
-                </div>
-
-                <div className="w-[200px]">
-                  {new BigNumber(t.transactionPrice)
-                    .multipliedBy(t.quantity)
-                    .toFormat(2)}
-                </div>
-              </div>
-            );
-          })}
+              );
+            })}
+          </div>
         </div>
-      </div>
-    </div>
+      </Accordion.Content>
+    </Accordion.Item>
   );
 };
 

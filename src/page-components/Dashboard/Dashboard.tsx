@@ -1,9 +1,5 @@
-import { BigNumber } from "bignumber.js";
-import Boring from "boring-avatars";
-import { AiOutlineArrowUp } from "react-icons/ai";
-import { IoCaretDown } from "react-icons/io5";
+import * as Accordion from "@radix-ui/react-accordion";
 import { Button } from "~/components";
-import { formatDistanceToNow } from "date-fns";
 import { api } from "~/utils/api";
 import { TransactionItem } from "./TransactionItem";
 
@@ -35,11 +31,11 @@ const Dashboard: React.FC = () => {
 
       <h3 className="mb-4">March 2023</h3>
 
-      <div className="space-y-4">
+      <Accordion.Root type="single" collapsible className="space-y-4">
         {transactionsQuery?.transactions.map((transaction, i) => (
           <TransactionItem key={transaction.id} transaction={transaction} />
         ))}
-      </div>
+      </Accordion.Root>
     </div>
   );
 };
