@@ -40,14 +40,26 @@ export const transactionsRouter = createTRPCRouter({
     }),
 
   getTransactionItems: protectedProcedure
-    .input(z.object({ transactionId: z.string() }))
+    .input(
+      z.object({
+        purchaseOrderId: z.string().optional(),
+        restockOrderId: z.string().optional(),
+      })
+    )
     .query(async ({ input }) => {
-      const transactionItems =
-        await prisma.transactionPurchaseOrderItems.findMany({
-          // @TODO: Restock
-          where: { transactionPurchaseOrderId: input.transactionId },
-          include: { item: true },
-        });
+      if (input.purchaseOrderId == null && input.restockOrderId == null) {
+        throw new Error('Missing "purchaseOrderId" or "restockOrderId"');
+      }
+
+      const transactionItems = input.purchaseOrderId
+        ? await prisma.transactionPurchaseOrderItems.findMany({
+            where: { transactionPurchaseOrderId: input.purchaseOrderId },
+            include: { item: true },
+          })
+        : await prisma.transactionRestockOrderItems.findMany({
+            where: { transactionRestockOrderId: input.restockOrderId },
+            include: { item: true },
+          });
 
       return { transactionItems: transactionItems };
     }),

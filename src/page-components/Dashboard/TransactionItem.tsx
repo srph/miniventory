@@ -1,14 +1,23 @@
 import { formatDistanceToNow } from "date-fns";
 import { BigNumber } from "bignumber.js";
 import Boring from "boring-avatars";
-import { AiOutlineArrowUp, AiOutlineArrowDown } from "react-icons/ai";
+import {
+  AiOutlineArrowUp,
+  AiOutlineArrowDown,
+  AiOutlineMinus,
+  AiOutlinePlus,
+} from "react-icons/ai";
 import { IoCaretDown } from "react-icons/io5";
 import * as Accordion from "@radix-ui/react-accordion";
 import { api } from "~/utils/api";
+import restock from "~/pages/inventory/restock";
 
 const TransactionItem: React.FC = ({ transaction }) => {
+  const { purchaseOrder, restockOrder } = transaction;
+
   const { data: itemsQuery } = api.transactions.getTransactionItems.useQuery({
-    transactionId: transaction.purchaseOrder.id,
+    purchaseOrderId: purchaseOrder?.id,
+    restockOrderId: restockOrder?.id,
   });
 
   return (
@@ -18,50 +27,85 @@ const TransactionItem: React.FC = ({ transaction }) => {
     >
       <Accordion.Header className="flex h-[48px] items-center py-3 px-3">
         <div className="w-[240px] shrink-0">
-          <span className="font-mono">{transaction.purchaseOrder.code}</span>
+          <span className="font-mono">
+            {purchaseOrder ? purchaseOrder.code : restockOrder.code}
+          </span>
         </div>
 
         <div className="w-[200px] shrink-0">
-          {Boolean(transaction.purchaseOrder.customer) && (
+          {Boolean(purchaseOrder?.customer) && (
             <div className="flex items-center gap-2">
               <Boring
                 size={24}
                 colors={["#0F7D7E", "#76B5A0", "#FFFDD1", "#FF7575", "#D33649"]}
                 name="Marie Joyce"
               />
-              {transaction.purchaseOrder.customer.name}
+              {purchaseOrder.customer.name}
             </div>
           )}
         </div>
 
         <div className="w-[200px] shrink-0">
-          {transaction.purchaseOrder.totalQuantity} units purchased
+          {Boolean(purchaseOrder) && (
+            <span>{purchaseOrder.totalQuantity} units purchased</span>
+          )}
+
+          {restockOrder && (
+            <span>{restockOrder.totalQuantity} units restocked</span>
+          )}
         </div>
 
+        <div className="w-[200px] shrink-0"></div>
+
         <div className="w-[200px] shrink-0">
-          <div className="flex items-center gap-2">
-            {transaction.purchaseOrder.totalProfit > 0 && (
+          {Boolean(purchaseOrder) && (
+            <div className="flex items-center gap-2">
+              {/* {purchaseOrder.totalProfit > 0 ? (
+                <span className="text-emerald-400">
+                  <AiOutlineArrowUp />
+                </span>
+              ) : (
+                <span className="text-red-500">
+                  <AiOutlineArrowDown />
+                </span>
+              )} */}
+
               <span className="text-emerald-400">
-                <AiOutlineArrowUp />
+                <AiOutlinePlus />
               </span>
-            )}
 
-            {transaction.purchaseOrder.totalProfit <= 0 && (
+              <span className="font-medium">
+                {new BigNumber(purchaseOrder.totalSales).toFormat(2)}
+              </span>
+            </div>
+          )}
+
+          {Boolean(restockOrder) && (
+            <div className="flex items-center gap-2">
               <span className="text-red-500">
-                <AiOutlineArrowDown />
+                <AiOutlineMinus />
               </span>
-            )}
 
-            <span className="font-medium">
-              {new BigNumber(transaction.purchaseOrder.totalSales).toFormat(2)}
-            </span>
-          </div>
+              <span className="font-medium">
+                {new BigNumber(restockOrder.totalExpenses).toFormat(2)}
+              </span>
+            </div>
+          )}
         </div>
 
         <div className="flex w-full justify-end gap-8">
           <span className="text-neutral-300">
-            {formatDistanceToNow(new Date(transaction.purchaseOrder.createdAt))}{" "}
-            ago
+            {Boolean(purchaseOrder) && (
+              <span>
+                {formatDistanceToNow(new Date(purchaseOrder.createdAt))} ago
+              </span>
+            )}
+
+            {Boolean(restockOrder) && (
+              <span>
+                {formatDistanceToNow(new Date(restockOrder.createdAt))} ago
+              </span>
+            )}
           </span>
 
           <Accordion.Trigger>
@@ -72,11 +116,15 @@ const TransactionItem: React.FC = ({ transaction }) => {
         </div>
       </Accordion.Header>
 
-      <Accordion.Content className="overflow-hidden py-3 px-3">
+      <Accordion.Content className="overflow-hidden px-3 pb-3">
         <div>
           <div className="flex items-center">
             <div className="w-[440px]">
-              <div className="font-medium text-neutral-300">Unit</div>
+              <div className="font-medium text-neutral-300">Item</div>
+            </div>
+
+            <div className="w-[200px]">
+              <div className="font-medium text-neutral-300">Quantity</div>
             </div>
 
             <div className="w-[200px]">
@@ -93,7 +141,7 @@ const TransactionItem: React.FC = ({ transaction }) => {
           <div className="space-y-2">
             {itemsQuery?.transactionItems.map((t, i) => {
               return (
-                <div className="flex items-center" key={i}>
+                <div className="flex items-center" key={t.id}>
                   <div className="w-[440px]">
                     <div className="flex items-center gap-2">
                       {t.item.thumbnailUrl ? (
@@ -105,23 +153,40 @@ const TransactionItem: React.FC = ({ transaction }) => {
                         <div className="h-[24px] w-[24px] rounded bg-neutral-800" />
                       )}
 
-                      <span>
-                        {t.item.name}{" "}
-                        <span className="text-neutral-300">
-                          ({t.quantity}x)
-                        </span>
-                      </span>
+                      <span>{t.item.name}</span>
                     </div>
                   </div>
 
+                  <div className="w-[200px]">{t.quantity} pc</div>
+
                   <div className="w-[200px]">
-                    {new BigNumber(t.transactionPrice).toFormat(2)}
+                    {purchaseOrder && (
+                      <span>
+                        {new BigNumber(t.transactionPrice).toFormat(2)}
+                      </span>
+                    )}
+
+                    {restockOrder && (
+                      <span>{new BigNumber(t.factoryPrice).toFormat(2)}</span>
+                    )}
                   </div>
 
                   <div className="w-[200px]">
-                    {new BigNumber(t.transactionPrice)
-                      .multipliedBy(t.quantity)
-                      .toFormat(2)}
+                    {purchaseOrder && (
+                      <span>
+                        {new BigNumber(t.transactionPrice)
+                          .multipliedBy(t.quantity)
+                          .toFormat(2)}
+                      </span>
+                    )}
+
+                    {restockOrder && (
+                      <span>
+                        {new BigNumber(t.factoryPrice)
+                          .multipliedBy(t.quantity)
+                          .toFormat(2)}
+                      </span>
+                    )}
                   </div>
                 </div>
               );

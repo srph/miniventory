@@ -61,7 +61,10 @@ const AppLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
 
               <div className="flex items-center gap-6">
                 {pathname === "/" && (
-                  <Button variant="primary" onClick={() => push("/orders/new")}>
+                  <Button
+                    variant="primary"
+                    onClick={() => push("/transactions/purchase")}
+                  >
                     Purchase
                   </Button>
                 )}
@@ -69,14 +72,17 @@ const AppLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
                 {pathname === "/inventory" && (
                   <Button
                     variant="primary"
-                    onClick={() => push("/inventory/restock")}
+                    onClick={() => push("/transactions/restock")}
                   >
                     Restock
                   </Button>
                 )}
 
                 {pathname === "/customers" && (
-                  <Button variant="primary" onClick={() => push("/orders/new")}>
+                  <Button
+                    variant="primary"
+                    onClick={() => push("/customers/create")}
+                  >
                     New Customer
                   </Button>
                 )}

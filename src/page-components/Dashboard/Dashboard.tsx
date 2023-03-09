@@ -9,7 +9,7 @@ const Dashboard: React.FC = () => {
   });
 
   return (
-    <div className="mx-auto w-[1120px] px-2">
+    <div className="mx-auto w-[1280px] px-2">
       <div className="flex items-center justify-between">
         <div className="w-[400px]">
           <input
