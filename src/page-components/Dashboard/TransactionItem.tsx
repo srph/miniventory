@@ -32,7 +32,7 @@ const TransactionItem: React.FC = ({ transaction }) => {
           </span>
         </div>
 
-        <div className="w-[200px] shrink-0">
+        <div className="w-[40px] shrink-0">
           {Boolean(purchaseOrder?.customer) && (
             <div className="flex items-center gap-2">
               <Boring
@@ -40,7 +40,6 @@ const TransactionItem: React.FC = ({ transaction }) => {
                 colors={["#0F7D7E", "#76B5A0", "#FFFDD1", "#FF7575", "#D33649"]}
                 name="Marie Joyce"
               />
-              {purchaseOrder.customer.name}
             </div>
           )}
         </div>
@@ -119,7 +118,7 @@ const TransactionItem: React.FC = ({ transaction }) => {
       <Accordion.Content className="overflow-hidden px-3 pb-3">
         <div>
           <div className="flex items-center">
-            <div className="w-[440px]">
+            <div className="w-[280px]">
               <div className="font-medium text-neutral-300">Item</div>
             </div>
 
@@ -142,7 +141,7 @@ const TransactionItem: React.FC = ({ transaction }) => {
             {itemsQuery?.transactionItems.map((t, i) => {
               return (
                 <div className="flex items-center" key={t.id}>
-                  <div className="w-[440px]">
+                  <div className="w-[280px]">
                     <div className="flex items-center gap-2">
                       {t.item.thumbnailUrl ? (
                         <img
