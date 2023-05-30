@@ -20,5 +20,10 @@ const config = {
     locales: ["en"],
     defaultLocale: "en",
   },
+
+  // https://docs.uploadthing.com/nextjs/pagedir
+  experimental: {
+    esmExternals: false,
+  },
 };
 export default config;

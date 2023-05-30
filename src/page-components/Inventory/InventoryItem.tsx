@@ -1,10 +1,4 @@
-import { formatDistanceToNow } from "date-fns";
 import { BigNumber } from "bignumber.js";
-import Boring from "boring-avatars";
-import { AiOutlineArrowUp, AiOutlineArrowDown } from "react-icons/ai";
-import { IoCaretDown } from "react-icons/io5";
-import * as Accordion from "@radix-ui/react-accordion";
-import { api } from "~/utils/api";
 
 const InventoryItem: React.FC = ({ item }) => {
   return (

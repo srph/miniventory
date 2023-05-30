@@ -1,6 +1,6 @@
 import React from "react";
 import Head from "next/head";
-import * as z from "zod";
+import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm, FormProvider, Controller } from "react-hook-form";
 import { useRouter } from "next/router";
@@ -15,20 +15,17 @@ import {
 import { config } from "~/config";
 import { api } from "~/utils/api";
 import { BrandSelect } from "./BrandAutocomplete";
-
-interface FormState {
-  name: string;
-  brandId: string;
-  factoryPrice: string;
-  retailPrice: string;
-}
+import { ThumbnailUploader } from "./ThumbnailUploader";
 
 const schema = z.object({
   name: z.string().min(1),
   brandId: z.string().min(1),
   factoryPrice: z.preprocess(Number, z.number().min(1)),
   retailPrice: z.preprocess(Number, z.number().min(1)),
+  thumbnailUrl: z.string().optional(),
 });
+
+type FormState = z.infer<typeof schema>;
 
 const InventoryCreate = () => {
   const form = useForm<FormState>({
@@ -90,10 +87,29 @@ const InventoryCreate = () => {
                 render={({ field, fieldState }) => {
                   return (
                     <BrandSelect
-                      error={fieldState.error?.message}
                       value={field.value}
                       onChange={field.onChange}
                       error={fieldState.error?.message}
+                    />
+                  );
+                }}
+              />
+            </FormSection>
+
+            <FormDivider />
+
+            <FormSection
+              title="Product Thumbnail"
+              description="This will be served as a visual identifier for the product. (Optional)"
+            >
+              <Controller
+                name="thumbnailUrl"
+                control={form.control}
+                render={({ field }) => {
+                  return (
+                    <ThumbnailUploader
+                      file={field.value}
+                      onUpload={field.onChange}
                     />
                   );
                 }}
