@@ -115,19 +115,25 @@ const OrdersNew: NextPage = () => {
 
   const totalSales = useMemo(() => {
     return transactionItems.reduce((total, t) => {
-      return total + t.transactionPrice * t.quantity;
+      return total + Number(t.transactionPrice) * Number(t.quantity);
     }, 0);
   }, [fields, transactionItems]);
 
   const expectedProfit = useMemo(() => {
     return transactionItems.reduce((total, t) => {
-      return total + t.item.factoryPrice - t.item.retailPrice * t.quantity;
+      return (
+        total + t.item.factoryPrice - t.item.retailPrice * Number(t.quantity)
+      );
     }, 0);
   }, [fields, transactionItems]);
 
   const totalProfit = useMemo(() => {
     return transactionItems.reduce((total, t) => {
-      return total + t.item.factoryPrice - t.transactionPrice * t.quantity;
+      return (
+        total +
+        t.item.factoryPrice -
+        Number(t.transactionPrice) * Number(t.quantity)
+      );
     }, 0);
   }, [fields, transactionItems]);
 
@@ -276,9 +282,9 @@ const OrdersNew: NextPage = () => {
                             <div className="mb-2"></div>
 
                             <span>
-                              {new BigNumber(
-                                t.transactionPrice * t.quantity
-                              ).toFormat(2)}
+                              {new BigNumber(t.transactionPrice)
+                                .times(t.quantity)
+                                .toFormat(2)}
                             </span>
                           </div>
 

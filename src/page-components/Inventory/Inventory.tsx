@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useRouter } from "next/router";
 import { Button } from "~/components";
 import { api } from "~/utils/api";
 import { InventoryItem } from "./InventoryItem";
@@ -9,6 +10,8 @@ const Inventory: React.FC = () => {
   const { data: itemsQuery } = api.inventory.getAll.useQuery({
     search,
   });
+
+  const { push } = useRouter();
 
   return (
     <div className="mx-auto w-[920px] px-2">
@@ -24,7 +27,9 @@ const Inventory: React.FC = () => {
 
         <div className="flex items-center gap-3">
           <Button>Stock</Button>
-          <Button variant="primary">New Product</Button>
+          <Button variant="primary" onClick={() => push("/inventory/create")}>
+            New Product
+          </Button>
         </div>
       </div>
 

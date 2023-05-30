@@ -1,19 +1,20 @@
 import React from "react";
 
-interface TextInputProps {
+interface TextSelectProps {
   label?: string;
   error?: string;
   value?: string;
-  onChange?: (evt: React.ChangeEvent<HTMLInputElement>) => void;
+  children?: string;
+  placeholder?: string;
+  onChange?: (evt: React.ChangeEvent<HTMLSelectElement>) => void;
 }
 
-type CombinedTextInputProps = React.InputHTMLAttributes<HTMLInputElement> &
-  TextInputProps;
-
 // Make this a polymorphic component that can be a a button or link
-const TextInput: React.FC<CombinedTextInputProps> = ({
+const TextSelect: React.FC<TextSelectProps> = ({
   label,
   error,
+  children,
+  placeholder,
   ...props
 }) => {
   return (
@@ -23,12 +24,14 @@ const TextInput: React.FC<CombinedTextInputProps> = ({
           {label}
         </label>
       )}
-      <input
-        type="text"
-        placeholder="Search for a transaction #"
+      <select
         className="block w-full rounded border border-neutral-700 bg-neutral-800 py-3 px-3 leading-none"
         {...props}
-      />
+      >
+        <option>{placeholder ?? "Select an option"}</option>
+        {children}
+      </select>
+
       {error && (
         <>
           <div className="mb-2"></div>
@@ -39,4 +42,4 @@ const TextInput: React.FC<CombinedTextInputProps> = ({
   );
 };
 
-export { TextInput };
+export { TextSelect };

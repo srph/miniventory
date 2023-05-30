@@ -7,9 +7,6 @@ import { getAuthenticatedServerSideProps } from "~/server/auth";
 import { api } from "~/utils/api";
 
 const InventoryPage: NextPage = () => {
-  const { data: transactionsQuery, isLoading: isTransactionsQueryLoading } =
-    api.transactions.getAll.useQuery({ search: "" });
-
   return (
     <>
       <Head>

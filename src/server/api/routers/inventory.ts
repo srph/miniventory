@@ -8,7 +8,10 @@ export const inventoryRouter = createTRPCRouter({
     .query(async ({ input }) => {
       const filters = input.search ? { name: { contains: input.search } } : {};
 
-      const items = await prisma.item.findMany({ where: filters });
+      const items = await prisma.item.findMany({
+        where: filters,
+        include: { brand: true },
+      });
 
       return { items };
     }),
@@ -16,8 +19,8 @@ export const inventoryRouter = createTRPCRouter({
   create: protectedProcedure
     .input(
       z.object({
+        name: z.string().min(1),
         brandId: z.string(),
-        name: z.string(),
         factoryPrice: z.number().min(1),
         retailPrice: z.number().min(1),
         thumbnailUrl: z.string().optional(),
@@ -37,7 +40,7 @@ export const inventoryRouter = createTRPCRouter({
         },
       });
 
-      return { customer: item };
+      return { item };
     }),
 
   update: protectedProcedure
