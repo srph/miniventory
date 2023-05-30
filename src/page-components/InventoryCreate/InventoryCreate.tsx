@@ -15,7 +15,7 @@ import {
 import { config } from "~/config";
 import { api } from "~/utils/api";
 import { BrandSelect } from "./BrandAutocomplete";
-import { ThumbnailUploader } from "./ThumbnailUploader";
+import { ThumbnailUploader } from "~/shared-components/ThumbnailUploader";
 
 const schema = z.object({
   name: z.string().min(1),
