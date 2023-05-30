@@ -5,6 +5,14 @@ import Link from "next/link";
 import { useRouter } from "next/router";
 import { Button } from "~/ui-components";
 import { signOut, useSession } from "next-auth/react";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "~/ui-components";
 
 const AppLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const { data } = useSession();
@@ -61,20 +69,31 @@ const AppLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
 
               <div className="flex items-center gap-6">
                 {pathname === "/" && (
-                  <Button
-                    variant="primary"
-                    onClick={() => push("/transactions/purchase")}
-                  >
-                    Purchase
-                  </Button>
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button variant="primary">New Transaction</Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent>
+                      <DropdownMenuItem
+                        onClick={() => push("/transactions/purchase")}
+                      >
+                        Purchase Order
+                      </DropdownMenuItem>
+                      <DropdownMenuItem
+                        onClick={() => push("/transactions/restock")}
+                      >
+                        Restock Order
+                      </DropdownMenuItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
                 )}
 
                 {pathname === "/inventory" && (
                   <Button
                     variant="primary"
-                    onClick={() => push("/transactions/restock")}
+                    onClick={() => push("/inventory/create")}
                   >
-                    Restock
+                    New Item
                   </Button>
                 )}
 

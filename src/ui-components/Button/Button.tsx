@@ -14,43 +14,41 @@ type CombinedButtonProps = React.ButtonHTMLAttributes<HTMLButtonElement> &
   ButtonProps;
 
 // Make this a polymorphic component that can be a a button or link
-const Button: React.FC<CombinedButtonProps> = ({
-  children,
-  full = false,
-  variant = "default",
-  ...rest
-}) => {
-  return (
-    <button
-      type="button"
-      className={cx("rounded px-4 py-3", {
-        "bg-emerald-400": variant === "primary",
-        "bg-neutral-500": variant === "default",
-        "inline-block": !full,
-        "block w-full": full,
-      })}
-      {...rest}
-    >
-      <div className="flex items-center gap-2">
-        <span
-          className={cx({
-            "text-emerald-700": variant === "primary",
-            "text-neutral-400": variant === "default",
-          })}
-        >
-          <IoAmericanFootball />
-        </span>
+const Button = React.forwardRef<HTMLButtonElement, CombinedButtonProps>(
+  ({ children, full = false, variant = "default", ...rest }, ref) => {
+    return (
+      <button
+        type="button"
+        className={cx("rounded px-4 py-3", {
+          "bg-emerald-400": variant === "primary",
+          "bg-neutral-500": variant === "default",
+          "inline-block": !full,
+          "block w-full": full,
+        })}
+        {...rest}
+        ref={ref}
+      >
+        <div className="flex items-center gap-2">
+          <span
+            className={cx({
+              "text-emerald-700": variant === "primary",
+              "text-neutral-400": variant === "default",
+            })}
+          >
+            <IoAmericanFootball />
+          </span>
 
-        <span
-          className={cx("font-medium", {
-            "text-emerald-800": variant === "primary",
-          })}
-        >
-          {children}
-        </span>
-      </div>
-    </button>
-  );
-};
+          <span
+            className={cx("font-medium", {
+              "text-emerald-800": variant === "primary",
+            })}
+          >
+            {children}
+          </span>
+        </div>
+      </button>
+    );
+  }
+);
 
 export { Button };
