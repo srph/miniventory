@@ -1,4 +1,4 @@
-import { TextSelect, TextSelectProps } from "~/components";
+import { TextSelect, TextSelectProps } from "~/ui";
 import { api } from "~/utils/api";
 
 type BrandSelectProps = Pick<TextSelectProps, "name" | "value" | "onChange">;

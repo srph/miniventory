@@ -1,5 +1,5 @@
 import * as Accordion from "@radix-ui/react-accordion";
-import { Button } from "~/components";
+import { Button } from "~/ui";
 import { api } from "~/utils/api";
 import { TransactionItem } from "./TransactionItem";
 

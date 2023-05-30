@@ -11,7 +11,7 @@ import {
   FormSectionSpacer,
   FormDivider,
   FormActions,
-} from "~/components";
+} from "~/ui";
 import { config } from "~/config";
 import { api } from "~/utils/api";
 import { BrandSelect } from "./BrandAutocomplete";

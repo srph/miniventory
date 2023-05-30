@@ -2,7 +2,7 @@ import { type NextPage } from "next";
 import Head from "next/head";
 import { useSession, signIn } from "next-auth/react";
 import { config } from "~/config";
-import { Button } from "~/components";
+import { Button } from "~/ui";
 import { getGuestServerSideProps } from "~/server/auth";
 
 const Login: NextPage = () => {
