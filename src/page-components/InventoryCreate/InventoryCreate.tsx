@@ -119,8 +119,8 @@ const InventoryCreate = () => {
             <FormDivider />
 
             <FormSection
-              title="Product Prices"
-              description="This information will be displayed publicly so be careful what you share."
+              title="Logistics"
+              description="Set prices for the product and quantity available."
             >
               <Controller
                 name="factoryPrice"

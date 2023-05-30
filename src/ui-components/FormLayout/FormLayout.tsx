@@ -26,7 +26,7 @@ const FormSection: React.FC<FormSectionProps> = ({
 };
 
 const FormSectionSpacer: React.FC = () => {
-  return <div className="mb-6" />;
+  return <div className="mb-8" />;
 };
 
 interface FormDividerProps {

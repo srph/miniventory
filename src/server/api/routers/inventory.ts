@@ -60,6 +60,7 @@ export const inventoryRouter = createTRPCRouter({
         id: z.string(),
         brandId: z.string(),
         name: z.string(),
+        quantity: z.number(),
         factoryPrice: z.number().min(1),
         retailPrice: z.number().min(1),
         thumbnailUrl: z.string().optional(),
@@ -70,6 +71,7 @@ export const inventoryRouter = createTRPCRouter({
         where: { id: input.id },
         data: {
           name: input.name,
+          quantity: input.quantity,
           factoryPrice: input.factoryPrice,
           retailPrice: input.retailPrice,
           thumbnailUrl: input.thumbnailUrl,

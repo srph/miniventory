@@ -23,6 +23,7 @@ const schema = z.object({
   factoryPrice: z.preprocess(Number, z.number().min(1)),
   retailPrice: z.preprocess(Number, z.number().min(1)),
   thumbnailUrl: z.string().optional(),
+  quantity: z.preprocess(Number, z.number()),
 });
 
 type FormState = z.infer<typeof schema>;
@@ -135,8 +136,8 @@ const InventoryEdit = () => {
             <FormDivider />
 
             <FormSection
-              title="Product Prices"
-              description="This information will be displayed publicly so be careful what you share."
+              title="Logistics"
+              description="Set prices for the product and quantity available."
             >
               <Controller
                 name="factoryPrice"
@@ -165,6 +166,18 @@ const InventoryEdit = () => {
                       label="Retail Price"
                       placeholder="300.00"
                     />
+                  );
+                }}
+              />
+
+              <FormSectionSpacer />
+
+              <Controller
+                name="quantity"
+                control={form.control}
+                render={({ field }) => {
+                  return (
+                    <TextInput {...field} label="Quantity" placeholder="5" />
                   );
                 }}
               />
