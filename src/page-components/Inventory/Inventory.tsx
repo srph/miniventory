@@ -47,6 +47,7 @@ const Inventory: React.FC = () => {
         <span className="w-[160px]">Factory Price</span>
         <span className="w-[160px]">Retail Price</span>
         <span className="w-[160px]">Quantity</span>
+        <span className="w-[20px]"></span>
       </div>
 
       <div className="mb-3"></div>
