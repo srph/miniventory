@@ -9,7 +9,9 @@ import { api } from "~/utils/api";
 const InventoryItem: React.FC = ({ item }) => {
   return (
     <div className="flex items-center rounded bg-neutral-500 py-3 px-3">
-      <span className="w-[160px]">{item.brand.name}</span>
+      <span className="w-[160px]">
+        <span className="text-neutral-300">{item.brand.name}</span>
+      </span>
 
       <div className="flex w-[400px] items-center gap-2">
         {item.thumbnailUrl ? (

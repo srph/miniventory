@@ -36,6 +36,7 @@ const Inventory: React.FC = () => {
       <div className="mb-16"></div>
 
       <div className="flex items-center px-3 font-medium text-neutral-500">
+        <span className="w-[160px]">Brand</span>
         <div className="w-[400px]">Name</div>
         <span className="w-[160px]">Factory Price</span>
         <span className="w-[160px]">Retail Price</span>
