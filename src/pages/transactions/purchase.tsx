@@ -6,7 +6,7 @@ import Head from "next/head";
 import { IoClose } from "react-icons/io5";
 import { MdVerified } from "react-icons/md";
 import { config } from "~/config";
-import { Autocomplete, AutocompleteOption, Button } from "~/ui";
+import { Autocomplete, AutocompleteOption, Button } from "~/ui-components";
 import { AppLayout } from "~/page-components/AppLayout";
 import { api } from "~/utils/api";
 import { getAuthenticatedServerSideProps } from "~/server/auth";

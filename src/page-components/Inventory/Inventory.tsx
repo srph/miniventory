@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useRouter } from "next/router";
-import { Button } from "~/ui";
+import { Button } from "~/ui-components";
 import { api } from "~/utils/api";
 import { InventoryItem } from "./InventoryItem";
 

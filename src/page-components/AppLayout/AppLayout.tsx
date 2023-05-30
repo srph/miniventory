@@ -3,7 +3,7 @@ import cx from "classnames";
 import Boring from "boring-avatars";
 import Link from "next/link";
 import { useRouter } from "next/router";
-import { Button } from "~/ui";
+import { Button } from "~/ui-components";
 import { signOut, useSession } from "next-auth/react";
 
 const AppLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => {

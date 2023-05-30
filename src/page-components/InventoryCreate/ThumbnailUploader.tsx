@@ -3,6 +3,7 @@ import invariant from "tiny-invariant";
 import cx from "classnames";
 import { useDropzone } from "react-dropzone";
 import { useUploadThing } from "~/client/uploadthing";
+import { AiFillPlusCircle } from "react-icons/ai";
 
 interface ThumbnailUploaderProps {
   file?: string | null;
@@ -46,26 +47,38 @@ const ThumbnailUploader: React.FC<ThumbnailUploaderProps> = ({
     multiple: false,
   });
 
-  const activeFile = String(preview || file);
-
   return (
     <div
       {...getRootProps()}
       className={cx(
-        "flex h-[240px] w-[240px] items-center justify-center rounded border-dashed ",
+        "group relative flex h-[240px] w-[240px] cursor-pointer items-center justify-center overflow-hidden rounded border border-dashed",
         {
-          "border border-neutral-500": !isDragActive,
-          "border-2 border-blue-500": isDragActive,
+          "border-neutral-600": !isDragActive,
+          "border-blue-500": isDragActive,
         }
       )}
     >
       <input {...getInputProps()} />
 
-      {Boolean(activeFile) && (
+      {!preview && file && (
+        <div className="absolute inset-0 flex h-full w-full items-center justify-center bg-black/40 opacity-0 group-hover:opacity-100">
+          <div className="text-[32px] text-neutral-500">
+            <AiFillPlusCircle />
+          </div>
+        </div>
+      )}
+
+      {Boolean(preview || file) && (
         <img
-          src={activeFile}
+          src={preview || file}
           className={cx("object-cover", { "animate-pulse": isUploading })}
         />
+      )}
+
+      {!preview && !file && (
+        <div aria-label="Button" className={cx("text-[32px] text-neutral-500")}>
+          <AiFillPlusCircle />
+        </div>
       )}
     </div>
   );

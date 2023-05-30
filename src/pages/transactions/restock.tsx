@@ -5,7 +5,12 @@ import { useRouter } from "next/router";
 import Head from "next/head";
 import { IoClose } from "react-icons/io5";
 import { config } from "~/config";
-import { Autocomplete, AutocompleteOption, Button, TextInput } from "~/ui";
+import {
+  Autocomplete,
+  AutocompleteOption,
+  Button,
+  TextInput,
+} from "~/ui-components";
 import { AppLayout } from "~/page-components/AppLayout";
 import { api } from "~/utils/api";
 import { getAuthenticatedServerSideProps } from "~/server/auth";
