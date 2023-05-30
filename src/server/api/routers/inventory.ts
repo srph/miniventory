@@ -43,6 +43,17 @@ export const inventoryRouter = createTRPCRouter({
       return { item };
     }),
 
+  getById: protectedProcedure
+    .input(z.object({ id: z.string() }))
+    .query(async ({ input }) => {
+      const item = await prisma.item.findUnique({
+        where: { id: input.id },
+        include: { brand: true },
+      });
+
+      return { item };
+    }),
+
   update: protectedProcedure
     .input(
       z.object({
@@ -68,6 +79,6 @@ export const inventoryRouter = createTRPCRouter({
         },
       });
 
-      return { customer: item };
+      return { item };
     }),
 });
