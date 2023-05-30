@@ -30,7 +30,7 @@ export const inventoryRouter = createTRPCRouter({
       const item = await prisma.item.create({
         data: {
           name: input.name,
-          quantity: 1,
+          quantity: 0,
           factoryPrice: input.factoryPrice,
           retailPrice: input.retailPrice,
           thumbnailUrl: input.thumbnailUrl,
