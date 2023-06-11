@@ -45,7 +45,7 @@ npm run db:seed
 Then, you're good to go:
 
 ```bash
-npm start
+npm run dev
 ```
 
 ## Prisma
