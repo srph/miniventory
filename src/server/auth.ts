@@ -48,6 +48,10 @@ export const authOptions: NextAuthOptions = {
       }
       return session;
     },
+
+    signIn() {
+      return env.APP_ALLOW_SIGNUP === "true";
+    },
   },
   adapter: PrismaAdapter(prisma),
   providers: [
