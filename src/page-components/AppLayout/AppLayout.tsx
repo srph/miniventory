@@ -9,10 +9,10 @@ import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "~/ui-components";
+
+const colors = ["#0F7D7E", "#76B5A0", "#FFFDD1", "#FF7575", "#D33649"];
 
 const AppLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const { data } = useSession();
@@ -129,17 +129,14 @@ const AppLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
                 )}
 
                 <button type="button" onClick={() => signOut()}>
-                  <Boring
-                    size={40}
-                    colors={[
-                      "#0F7D7E",
-                      "#76B5A0",
-                      "#FFFDD1",
-                      "#FF7575",
-                      "#D33649",
-                    ]}
-                    name={data.user.name}
-                  />
+                  {data.user.image ? (
+                    <img
+                      src={data.user.image}
+                      className="h-[40px] w-[40px] rounded-full border-2 border-neutral-500"
+                    />
+                  ) : (
+                    <Boring size={40} colors={colors} name={data.user.name} />
+                  )}
                 </button>
               </div>
             </div>
