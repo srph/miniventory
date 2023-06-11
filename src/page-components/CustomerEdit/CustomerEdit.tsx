@@ -43,7 +43,7 @@ const CustomerEdit = () => {
     });
   };
 
-  const { data: customerQuery } = api.customers.getById.useQuery(
+  const { data: customerQuery } = api.brands.getById.useQuery(
     { id: String(query.id) },
     { enabled: Boolean(query.id), onSuccess: handleQuerySuccess }
   );
@@ -57,7 +57,7 @@ const CustomerEdit = () => {
   const {
     mutate: updateCustomerMutation,
     isLoading: isUpdateCustomerMutationLoading,
-  } = api.customers.update.useMutation({ onSuccess: handleSuccess });
+  } = api.brands.update.useMutation({ onSuccess: handleSuccess });
 
   const onSubmit = form.handleSubmit((values) => {
     console.log(values);

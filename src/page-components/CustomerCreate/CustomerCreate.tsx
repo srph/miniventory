@@ -38,7 +38,7 @@ const CustomerCreate = () => {
   };
 
   const { mutate: createItemMutation, isLoading: isCreateItemMutationLoading } =
-    api.customers.create.useMutation({ onSuccess: handleSuccess });
+    api.brands.create.useMutation({ onSuccess: handleSuccess });
 
   const onSubmit = form.handleSubmit((values) => {
     createItemMutation(values);

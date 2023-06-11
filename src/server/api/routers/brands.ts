@@ -13,53 +13,56 @@ export const brandsRouter = createTRPCRouter({
       return { brands };
     }),
 
-  //   create: protectedProcedure
-  //     .input(
-  //       z.object({
-  //         name: z.string(),
-  //         email: z.string().optional(),
-  //         note: z.string().optional(),
-  //         phone: z.string().optional(),
-  //         thumbnailUrl: z.string().optional(),
-  //       })
-  //     )
-  //     .mutation(async ({ input }) => {
-  //       const customer = await prisma.customer.create({
-  //         data: {
-  //           name: input.name,
-  //           email: input.email,
-  //           note: input.note,
-  //           phone: input.phone,
-  //           thumbnailUrl: input.thumbnailUrl,
-  //         },
-  //       });
+  getDetailedList: protectedProcedure
+    .input(z.object({ search: z.string() }))
+    .query(async ({ input }) => {
+      const brands = await prisma.brand.findMany({
+        where: input.search ? { name: input.search } : {},
+        include: { items: true },
+      });
 
-  //       return { customer };
-  //     }),
+      return { brands };
+    }),
 
-  //   update: protectedProcedure
-  //     .input(
-  //       z.object({
-  //         id: z.string(),
-  //         name: z.string(),
-  //         email: z.string().optional(),
-  //         note: z.string().optional(),
-  //         phone: z.string().optional(),
-  //         thumbnailUrl: z.string().optional(),
-  //       })
-  //     )
-  //     .mutation(async ({ input }) => {
-  //       const customer = await prisma.customer.update({
-  //         where: { id: input.id },
-  //         data: {
-  //           name: input.name,
-  //           email: input.email,
-  //           note: input.note,
-  //           phone: input.phone,
-  //           thumbnailUrl: input.thumbnailUrl,
-  //         },
-  //       });
+  getById: protectedProcedure
+    .input(z.object({ id: z.string() }))
+    .query(async ({ input }) => {
+      const brand = await prisma.brand.findUniqueOrThrow({
+        where: { id: input.id },
+      });
 
-  //       return { customer };
-  //     }),
+      return { brand };
+    }),
+
+  create: protectedProcedure
+    .input(
+      z.object({
+        name: z.string(),
+      })
+    )
+    .mutation(async ({ input }) => {
+      const brand = await prisma.brand.create({
+        data: {
+          name: input.name,
+        },
+      });
+
+      return { brand };
+    }),
+
+  update: protectedProcedure
+    .input(
+      z.object({
+        id: z.string(),
+        name: z.string(),
+      })
+    )
+    .mutation(async ({ input }) => {
+      const brand = await prisma.brand.update({
+        where: { id: input.id },
+        data: { name: input.name },
+      });
+
+      return { brand };
+    }),
 });

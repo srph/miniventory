@@ -65,6 +65,19 @@ const AppLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
                 >
                   Customers
                 </Link>
+
+                <Link
+                  href="/brands"
+                  className={cx(
+                    "rounded px-3 py-3 font-medium  hover:text-white",
+                    {
+                      "text-neutral-400 ": pathname !== "/brand",
+                      "bg-neutral-500 text-white": pathname === "/brand",
+                    }
+                  )}
+                >
+                  Brands
+                </Link>
               </div>
 
               <div className="flex items-center gap-6">
@@ -103,6 +116,15 @@ const AppLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
                     onClick={() => push("/customers/create")}
                   >
                     New Customer
+                  </Button>
+                )}
+
+                {pathname === "/brands" && (
+                  <Button
+                    variant="primary"
+                    onClick={() => push("/brands/create")}
+                  >
+                    New Brand
                   </Button>
                 )}
 

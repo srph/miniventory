@@ -1,12 +1,12 @@
 import { useState } from "react";
 import { Button } from "~/ui-components";
 import { api } from "~/utils/api";
-import { CustomerItem } from "./CustomerItem";
+import { BrandItem } from "./BrandItem";
 
-const Customer: React.FC = () => {
+const Brand: React.FC = () => {
   const [search, setSearch] = useState("");
 
-  const { data: customersQuery } = api.brands.getAll.useQuery({
+  const { data: brandsQuery } = api.brands.getDetailedList.useQuery({
     search,
   });
 
@@ -30,22 +30,21 @@ const Customer: React.FC = () => {
       <div className="mb-16"></div>
 
       <div className="flex items-center px-3 font-medium text-neutral-500">
-        <div className="w-[320px]">Name</div>
-        <div className="w-[200px]">Phone</div>
-        <div className="w-[200px]">Email</div>
-        <div className="w-[200px]">Note</div>
-        <span className="w-[20px]"></span>
+        <div className="w-[240px]">Name</div>
+        <div className="w-[400px]">Inventory</div>
+        <div className="ml-auto w-[120px]">Date Added</div>
+        <span className="ml-auto w-[20px]"></span>
       </div>
 
       <div className="mb-3"></div>
 
       <div className="space-y-2">
-        {customersQuery?.customers.map((customer) => {
-          return <CustomerItem key={customer.id} customer={customer} />;
+        {brandsQuery?.brands.map((brand) => {
+          return <BrandItem key={brand.id} brand={brand} />;
         })}
       </div>
     </div>
   );
 };
 
-export { Customer };
+export { Brand };

@@ -35,7 +35,7 @@ const OrdersNew: NextPage = () => {
     data: customersQuery,
     isLoading: isCustomersQueryLoading,
     error: customersQueryError,
-  } = api.customers.getAll.useQuery({
+  } = api.brands.getAll.useQuery({
     search: customersFilter,
   });
 
