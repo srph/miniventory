@@ -2,14 +2,10 @@ import { type NextPage } from "next";
 import Head from "next/head";
 import { config } from "~/config";
 import { AppLayout } from "~/page-components/AppLayout";
-import { Dashboard } from "~/page-components/Dashboard";
+import { Customer } from "~/page-components/Customer";
 import { getAuthenticatedServerSideProps } from "~/server/auth";
-import { api } from "~/utils/api";
 
 const CustomersPage: NextPage = () => {
-  const { data: transactionsQuery, isLoading: isTransactionsQueryLoading } =
-    api.transactions.getAll.useQuery({ search: "" });
-
   return (
     <>
       <Head>
@@ -19,7 +15,7 @@ const CustomersPage: NextPage = () => {
       </Head>
 
       <AppLayout>
-        <Dashboard />
+        <Customer />
       </AppLayout>
     </>
   );
