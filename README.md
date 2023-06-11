@@ -19,6 +19,8 @@ Setup the environment config by copying `.env.example` to `.env`. And then tweak
 NEXTAUTH_SECRET=
 
 # Setup this through https://discord.com/developers/applications
+# After creating the app, make sure to select Oauth2 tab and add
+# "http://localhost:3000/api/auth/callback/discord" as redirect uri
 DISCORD_CLIENT_ID=
 DISCORD_CLIENT_SECRET=
 
