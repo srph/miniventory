@@ -16,7 +16,7 @@ Setup the environment config by coping `.env.example` to `.env`. And then tweak 
 
 ```
 # openssl rand -base64 32
-NEXTAUTH_SECRET="NxYkB7VK17mFjS+vQvD2NR2FnW58DZxXcf70/ujX2A0="
+NEXTAUTH_SECRET=
 
 # Setup this through https://discord.com/developers/applications
 DISCORD_CLIENT_ID=
