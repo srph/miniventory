@@ -1,16 +1,10 @@
 import { formatDistanceToNow } from "date-fns";
 import { BigNumber } from "bignumber.js";
 import Boring from "boring-avatars";
-import {
-  AiOutlineArrowUp,
-  AiOutlineArrowDown,
-  AiOutlineMinus,
-  AiOutlinePlus,
-} from "react-icons/ai";
+import { TotalStatus } from "~/shared-components/TotalStatus";
 import { IoCaretDown } from "react-icons/io5";
 import * as Accordion from "@radix-ui/react-accordion";
 import { api } from "~/utils/api";
-import restock from "~/pages/inventory/restock";
 
 const TransactionItem: React.FC = ({ transaction }) => {
   const { purchaseOrder, restockOrder } = transaction;
@@ -59,19 +53,7 @@ const TransactionItem: React.FC = ({ transaction }) => {
         <div className="w-[200px] shrink-0">
           {Boolean(purchaseOrder) && (
             <div className="flex items-center gap-2">
-              {/* {purchaseOrder.totalProfit > 0 ? (
-                <span className="text-emerald-400">
-                  <AiOutlineArrowUp />
-                </span>
-              ) : (
-                <span className="text-red-500">
-                  <AiOutlineArrowDown />
-                </span>
-              )} */}
-
-              <span className="text-emerald-400">
-                <AiOutlinePlus />
-              </span>
+              <TotalStatus positive />
 
               <span className="font-medium">
                 {new BigNumber(purchaseOrder.totalSales).toFormat(2)}
@@ -81,9 +63,7 @@ const TransactionItem: React.FC = ({ transaction }) => {
 
           {Boolean(restockOrder) && (
             <div className="flex items-center gap-2">
-              <span className="text-red-500">
-                <AiOutlineMinus />
-              </span>
+              <TotalStatus positive={false} />
 
               <span className="font-medium">
                 {new BigNumber(restockOrder.totalExpenses).toFormat(2)}

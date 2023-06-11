@@ -10,7 +10,7 @@ const auth = (_req: NextApiRequest, _res: NextApiResponse) => ({
 // FileRouter for your app, can contain multiple FileRoutes
 export const ourFileRouter = {
   // Define as many FileRoutes as you like, each with a unique routeSlug
-  imageUploader: f({ image: { maxFileSize: "4MB" } })
+  inventory: f({ image: { maxFileSize: "4MB" } })
     // Set permissions and file types for this FileRoute
     .middleware(async (req, res) => {
       // This code runs on your server before upload
@@ -24,6 +24,20 @@ export const ourFileRouter = {
     })
     .onUploadComplete(async ({ metadata, file }) => {
       // This code RUNS ON YOUR SERVER after upload
+      console.log("Upload complete for userId:", metadata.userId);
+
+      console.log("file url", file.url);
+    }),
+
+  customers: f({ image: { maxFileSize: "4MB" } })
+    .middleware(async (req, res) => {
+      const user = await auth(req, res);
+
+      if (!user) throw new Error("Unauthorized");
+
+      return { userId: user.id };
+    })
+    .onUploadComplete(async ({ metadata, file }) => {
       console.log("Upload complete for userId:", metadata.userId);
 
       console.log("file url", file.url);

@@ -4,6 +4,7 @@ import { createTRPCRouter, protectedProcedure } from "~/server/api/trpc";
 import { prisma } from "~/server/db";
 import { format } from "date-fns";
 import BigNumber from "bignumber.js";
+import invariant from "tiny-invariant";
 
 export const transactionsRouter = createTRPCRouter({
   getAll: protectedProcedure
@@ -24,19 +25,35 @@ export const transactionsRouter = createTRPCRouter({
       interface GroupedTransactionItem {
         label: string;
         transactions: Transaction[];
+        total: number
       }
+
+      const initial: Record<string, GroupedTransactionItem> = {}
 
       const transactionByMonth = transactions.reduce(
         (object: Record<string, GroupedTransactionItem>, item) => {
           const date = format(new Date(item.createdAt), "MMMM yyyy");
-          object[date] ??= { label: date, transactions: [] };
-          object[date].transactions.push(item);
+          
+          const op = object[date] ??= { label: date, transactions: [], total: 0 };
+          
+          op.transactions.push(item);
+
+          if (item.purchaseOrder) {
+            op.total += item.purchaseOrder.totalSales
+          } else if (item.restockOrder) {
+            op.total -= item.restockOrder.totalExpenses
+          } else {
+            throw new Error('Transaction is neither a purchase or restock order')
+          }
+
           return object;
         },
-        {}
+        initial
       );
 
-      return { transactionsByMonth: Object.values(transactionByMonth) };
+      return {
+        transactionsByMonth: Object.values(transactionByMonth)
+      };
     }),
 
   getTransactionItems: protectedProcedure

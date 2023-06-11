@@ -2,6 +2,9 @@ import * as Accordion from "@radix-ui/react-accordion";
 import { Button } from "~/ui-components";
 import { api } from "~/utils/api";
 import { TransactionItem } from "./TransactionItem";
+import { TotalStatus } from "~/shared-components/TotalStatus";
+import BigNumber from "bignumber.js";
+import { AiOutlineMinus, AiOutlinePlus } from "react-icons/ai";
 
 const Dashboard: React.FC = () => {
   const { data: transactionsQuery } = api.transactions.getAll.useQuery({
@@ -31,22 +34,31 @@ const Dashboard: React.FC = () => {
 
       <Accordion.Root type="single" collapsible className="space-y-4">
         <div className="space-y-6">
-          {transactionsQuery?.transactionsByMonth.map((group, i) => (
-            <div>
-              <h3 className="mb-4">{group.label}</h3>
+          {transactionsQuery?.transactionsByMonth.map((group) => {
+            return (
+              <div key={group.id}>
+                <div className="mb-4 flex items-center justify-between">
+                  <h3>{group.label}</h3>
 
-              <div className="space-y-2">
-                {group.transactions.map((transaction) => {
-                  return (
-                    <TransactionItem
-                      key={transaction.id}
-                      transaction={transaction}
-                    />
-                  );
-                })}
+                  <div className="flex items-center gap-1">
+                    <TotalStatus positive={group.total >= 0} />
+                    {new BigNumber(group.total).abs().toFormat(2)}
+                  </div>
+                </div>
+
+                <div className="space-y-2">
+                  {group.transactions.map((transaction) => {
+                    return (
+                      <TransactionItem
+                        key={transaction.id}
+                        transaction={transaction}
+                      />
+                    );
+                  })}
+                </div>
               </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
       </Accordion.Root>
     </div>

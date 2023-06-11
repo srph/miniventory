@@ -33,9 +33,6 @@ const Inventory: React.FC = () => {
 
         <div className="flex items-center gap-3">
           <Button>Stock</Button>
-          <Button variant="primary" onClick={() => push("/inventory/create")}>
-            New Product
-          </Button>
         </div>
       </div>
 

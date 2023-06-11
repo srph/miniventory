@@ -14,20 +14,19 @@ import {
 } from "~/ui-components";
 import { config } from "~/config";
 import { api } from "~/utils/api";
-import { BrandSelect } from "~/shared-components/BrandSelect";
 import { ThumbnailUploader } from "~/shared-components/ThumbnailUploader";
 
 const schema = z.object({
   name: z.string().min(1),
-  brandId: z.string().min(1),
-  factoryPrice: z.preprocess(Number, z.number().min(1)),
-  retailPrice: z.preprocess(Number, z.number().min(1)),
+  email: z.string().email().optional(),
+  note: z.string().optional(),
+  phone: z.string().optional(),
   thumbnailUrl: z.string().optional(),
 });
 
 type FormState = z.infer<typeof schema>;
 
-const InventoryCreate = () => {
+const CustomerCreate = () => {
   const form = useForm<FormState>({
     resolver: zodResolver(schema),
   });
@@ -35,11 +34,11 @@ const InventoryCreate = () => {
   const { push } = useRouter();
 
   const handleSuccess = () => {
-    push("/inventory");
+    push("/customers");
   };
 
   const { mutate: createItemMutation, isLoading: isCreateItemMutationLoading } =
-    api.inventory.create.useMutation({ onSuccess: handleSuccess });
+    api.customers.create.useMutation({ onSuccess: handleSuccess });
 
   const onSubmit = form.handleSubmit((values) => {
     createItemMutation(values);
@@ -54,7 +53,7 @@ const InventoryCreate = () => {
       </Head>
 
       <div className="mx-auto w-[888px] px-2">
-        <h2 className="text-2xl">New Inventory Item</h2>
+        <h2 className="text-2xl">Create New Customer</h2>
 
         <div className="mb-16"></div>
 
@@ -73,7 +72,7 @@ const InventoryCreate = () => {
                       {...field}
                       error={fieldState.error?.message}
                       label="Name"
-                      placeholder="Sinigang ni Joyce"
+                      placeholder="John Doe"
                     />
                   );
                 }}
@@ -82,25 +81,28 @@ const InventoryCreate = () => {
               <FormSectionSpacer />
 
               <Controller
-                name="brandId"
+                name="note"
                 control={form.control}
                 render={({ field, fieldState }) => {
                   return (
-                    <BrandSelect
-                      value={field.value}
-                      onChange={field.onChange}
+                    <TextInput
+                      {...field}
                       error={fieldState.error?.message}
+                      label="Note"
+                      placeholder="Reseller"
                     />
                   );
                 }}
               />
+
+              <FormSectionSpacer />
             </FormSection>
 
             <FormDivider />
 
             <FormSection
-              title="Product Thumbnail"
-              description="This will be served as a visual identifier for the product. (Optional)"
+              title="Customer Photo"
+              description="This will be served as a visual identifier for the customer. (Optional)"
             >
               <Controller
                 name="thumbnailUrl"
@@ -108,7 +110,7 @@ const InventoryCreate = () => {
                 render={({ field }) => {
                   return (
                     <ThumbnailUploader
-                      endpoint="inventory"
+                      endpoint="customers"
                       file={field.value}
                       onUpload={field.onChange}
                     />
@@ -120,19 +122,19 @@ const InventoryCreate = () => {
             <FormDivider />
 
             <FormSection
-              title="Logistics"
-              description="Set prices for the product and quantity available."
+              title="Contact"
+              description="Different ways to contact this customer."
             >
               <Controller
-                name="factoryPrice"
+                name="email"
                 control={form.control}
                 render={({ field, fieldState }) => {
                   return (
                     <TextInput
                       {...field}
                       error={fieldState.error?.message}
-                      label="Factory Price"
-                      placeholder="265.00"
+                      label="Email"
+                      placeholder="your@email.com"
                     />
                   );
                 }}
@@ -141,14 +143,14 @@ const InventoryCreate = () => {
               <FormSectionSpacer />
 
               <Controller
-                name="retailPrice"
+                name="phone"
                 control={form.control}
                 render={({ field }) => {
                   return (
                     <TextInput
                       {...field}
-                      label="Retail Price"
-                      placeholder="300.00"
+                      label="Phone No."
+                      placeholder="0915 582 4555"
                     />
                   );
                 }}
@@ -161,7 +163,7 @@ const InventoryCreate = () => {
                 variant="primary"
                 disabled={isCreateItemMutationLoading}
               >
-                Create Item
+                Create Customer
               </Button>
             </FormActions>
           </form>
@@ -171,4 +173,4 @@ const InventoryCreate = () => {
   );
 };
 
-export { InventoryCreate };
+export { CustomerCreate };

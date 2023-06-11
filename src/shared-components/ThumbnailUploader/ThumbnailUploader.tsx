@@ -3,9 +3,11 @@ import invariant from "tiny-invariant";
 import cx from "classnames";
 import { useDropzone } from "react-dropzone";
 import { useUploadThing } from "~/client/uploadthing";
+import type { OurFileRouter } from "~/server/uploadthing";
 import { AiFillPlusCircle } from "react-icons/ai";
 
 interface ThumbnailUploaderProps {
+  endpoint: keyof OurFileRouter
   file?: string | null;
   onUpload?: (url: string) => void;
 }
@@ -17,10 +19,11 @@ const accept = {
 
 const ThumbnailUploader: React.FC<ThumbnailUploaderProps> = ({
   file,
+  endpoint,
   onUpload,
 }) => {
   const { isUploading, startUpload } = useUploadThing({
-    endpoint: "imageUploader",
+    endpoint,
     onClientUploadComplete: (files) => {
       const file = files?.[0];
       invariant(file, "Missing file.");

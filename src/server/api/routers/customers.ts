@@ -17,7 +17,7 @@ export const customersRouter = createTRPCRouter({
     .input(
       z.object({
         name: z.string(),
-        email: z.string().optional(),
+        email: z.string().email().optional(),
         note: z.string().optional(),
         phone: z.string().optional(),
         thumbnailUrl: z.string().optional(),

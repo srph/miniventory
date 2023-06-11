@@ -125,6 +125,7 @@ const InventoryEdit = () => {
                 render={({ field }) => {
                   return (
                     <ThumbnailUploader
+                      endpoint="inventory"
                       file={field.value}
                       onUpload={field.onChange}
                     />
