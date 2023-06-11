@@ -9,10 +9,12 @@
     "postinstall": "prisma generate",
     "lint": "next lint",
     "start": "next start",
-    "db:studio": "prisma studio",
+    "db:docker": "docker-compose up -d",
     "db:generate": "prisma generate",
     "db:migrate": "prisma migrate dev",
-    "db:seed": "NODE_ENV=development prisma db seed"
+    "db:reset": "NODE_ENV=development prisma migrate reset",
+    "db:seed": "NODE_ENV=development prisma db seed",
+    "db:studio": "prisma studio"
   },
   "prisma": {
     "seed": "tsx prisma/seed.ts"

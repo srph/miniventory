@@ -1,0 +1,11 @@
+version: "3.1"
+services:
+  mysql:
+    image: mysql:5.7.40
+    environment:
+      MYSQL_DATABASE: miniventory
+      MYSQL_PASSWORD: root
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_USER: miniventory
+    ports:
+      - 3336:3306
