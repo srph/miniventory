@@ -12,7 +12,7 @@ Locally, this project requires Node >= 18 and Docker 2.
 npm install
 ```
 
-Setup the environment config by coping `.env.example` to `.env`. And then tweak the following:
+Setup the environment config by copying `.env.example` to `.env`. And then tweak the following:
 
 ```
 # openssl rand -base64 32
