@@ -36,7 +36,7 @@ const Dashboard: React.FC = () => {
         <div className="space-y-6">
           {transactionsQuery?.transactionsByMonth.map((group) => {
             return (
-              <div key={group.id}>
+              <div key={group.label}>
                 <div className="mb-4 flex items-center justify-between">
                   <h3>{group.label}</h3>
 

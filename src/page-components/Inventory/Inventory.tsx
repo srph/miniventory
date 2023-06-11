@@ -11,14 +11,6 @@ const Inventory: React.FC = () => {
     search,
   });
 
-  console.log(
-    api.inventory.getAll.useQuery({
-      search,
-    })
-  );
-
-  const { push } = useRouter();
-
   return (
     <div className="mx-auto w-[1000px] px-2">
       <div className="flex items-center justify-between">

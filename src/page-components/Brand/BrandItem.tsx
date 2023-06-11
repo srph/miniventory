@@ -1,3 +1,4 @@
+import { useMemo } from "react";
 import Link from "next/link";
 import { TbPencil } from "react-icons/tb";
 import { format } from "date-fns";
@@ -16,11 +17,11 @@ const Inactive = () => {
 };
 
 const BrandItem: React.FC = ({ brand }) => {
-  console.log(brand);
-
-  const totalUnits = brand.items.reduce((total, item) => {
-    return total + item.quantity;
-  }, 0);
+  const totalUnits = useMemo(() => {
+    return brand.items.reduce((total, item) => {
+      return total + item.quantity;
+    }, 0);
+  }, [brand]);
 
   return (
     <div className="group flex items-center rounded bg-neutral-500 py-3 px-3">
