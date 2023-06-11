@@ -10,7 +10,7 @@ import { brandsRouter } from "~/server/api/routers/brands";
  * All routers added in /api/routers should be manually added here.
  */
 export const appRouter = createTRPCRouter({
-  brands: customersRouter,
+  customers: customersRouter,
   inventory: inventoryRouter,
   transactions: transactionsRouter,
   brands: brandsRouter,

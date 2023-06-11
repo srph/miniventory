@@ -6,7 +6,7 @@ import { CustomerItem } from "./CustomerItem";
 const Customer: React.FC = () => {
   const [search, setSearch] = useState("");
 
-  const { data: customersQuery } = api.brands.getAll.useQuery({
+  const { data: customersQuery } = api.customers.getAll.useQuery({
     search,
   });
 

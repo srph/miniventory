@@ -71,8 +71,8 @@ const AppLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
                   className={cx(
                     "rounded px-3 py-3 font-medium  hover:text-white",
                     {
-                      "text-neutral-400 ": pathname !== "/brand",
-                      "bg-neutral-500 text-white": pathname === "/brand",
+                      "text-neutral-400 ": pathname !== "/brands",
+                      "bg-neutral-500 text-white": pathname === "/brands",
                     }
                   )}
                 >
