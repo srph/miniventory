@@ -24,11 +24,11 @@ const CustomerItem: React.FC = ({ customer }) => {
         </div>
       </div>
 
-      <span className="w-[200px]">{customer.phone ?? <Empty />}</span>
+      <span className="w-[200px]">{customer.phone || <Empty />}</span>
 
-      <span className="w-[200px]">{customer.email ?? <Empty />}</span>
+      <span className="w-[200px]">{customer.email || <Empty />}</span>
 
-      <span className="w-[200px]">{customer.note ?? <Empty />}</span>
+      <span className="w-[200px]">{customer.note || <Empty />}</span>
 
       <span className="ml-auto opacity-0 group-hover:opacity-100">
         <Link

@@ -13,11 +13,21 @@ export const customersRouter = createTRPCRouter({
       return { customers };
     }),
 
+  getById: protectedProcedure
+    .input(z.object({ id: z.string() }))
+    .query(async ({ input }) => {
+      const customer = await prisma.customer.findUnique({
+        where: { id: input.id },
+      });
+
+      return { customer };
+    }),
+
   create: protectedProcedure
     .input(
       z.object({
         name: z.string(),
-        email: z.string().email().optional(),
+        email: z.string().email().optional().or(z.literal("")),
         note: z.string().optional(),
         phone: z.string().optional(),
         thumbnailUrl: z.string().optional(),
@@ -42,13 +52,15 @@ export const customersRouter = createTRPCRouter({
       z.object({
         id: z.string(),
         name: z.string(),
-        email: z.string().optional(),
+        email: z.string().email().or(z.literal("")),
         note: z.string().optional(),
         phone: z.string().optional(),
         thumbnailUrl: z.string().optional(),
       })
     )
     .mutation(async ({ input }) => {
+      console.log(input);
+
       const customer = await prisma.customer.update({
         where: { id: input.id },
         data: {
@@ -59,6 +71,8 @@ export const customersRouter = createTRPCRouter({
           thumbnailUrl: input.thumbnailUrl,
         },
       });
+
+      console.log(customer);
 
       return { customer };
     }),
